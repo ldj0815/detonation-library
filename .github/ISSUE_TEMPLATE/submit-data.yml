@@ -1,0 +1,51 @@
+name: Submit data
+description: Contribute detonation cases as a CSV file
+title: "Data submission: "
+labels: ["data-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for contributing. Fill in the [CSV template](https://github.com/ldj0815/detonation-library/raw/main/data/TEMPLATE.csv), one row per case, then attach the file below.
+
+        **Everything in this form, including your name and email address, is public.**
+  - type: input
+    id: name
+    attributes:
+      label: Your name
+    validations:
+      required: true
+  - type: input
+    id: institution
+    attributes:
+      label: Institution
+    validations:
+      required: true
+  - type: input
+    id: email
+    attributes:
+      label: Contact email
+      description: Used if the maintainers have questions about the data.
+    validations:
+      required: true
+  - type: input
+    id: reference
+    attributes:
+      label: Reference or DOI
+      description: The publication the data comes from, if any.
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: What the data covers
+      description: Mixtures, facility, and how the values were measured or computed.
+    validations:
+      required: true
+  - type: textarea
+    id: csv
+    attributes:
+      label: CSV file
+      description: Drag your filled-in CSV file into this box to attach it.
+    validations:
+      required: true
