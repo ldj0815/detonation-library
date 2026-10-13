@@ -1,9 +1,9 @@
 import { useSearchParams } from 'react-router-dom'
-import { useCaseList } from '../../api/cases'
-import { useAdmin } from '../../context/AdminContext'
+import { useCaseList } from '../../data/hooks'
 import FilterBar from '../../components/FilterBar'
 import DataTable from '../../components/DataTable'
-import ColumnSelector, { useVisibleColumns } from '../../components/ColumnSelector'
+import ColumnSelector from '../../components/ColumnSelector'
+import { useVisibleColumns } from '../../components/columns'
 import Skeleton from '../../components/Skeleton'
 import ErrorMessage from '../../components/ErrorMessage'
 
@@ -24,7 +24,6 @@ const titles: Record<BrowseMode, string> = {
 }
 
 export default function BrowsePage({ mode }: BrowsePageProps) {
-  const { isAdmin } = useAdmin()
   const [params, setParams] = useSearchParams()
   const { visible, toggle } = useVisibleColumns()
   const offset = Number(params.get('offset') ?? 0)
@@ -46,7 +45,6 @@ export default function BrowsePage({ mode }: BrowsePageProps) {
     has_critical_hd: mode === 'critical-hd' ? true : undefined,
     has_min_hd: mode === 'min-hd' ? true : undefined,
     has_critical_energy: mode === 'critical-energy' ? true : undefined,
-    show_hidden: isAdmin ? true : undefined,
     sort_by: params.get('sort_by') ?? undefined,
     sort_dir: params.get('sort_dir') ?? undefined,
     limit: LIMIT,

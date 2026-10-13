@@ -1,8 +1,9 @@
 import { useSearchParams } from 'react-router-dom'
-import { useCaseList } from '../api/cases'
+import { useCaseList } from '../data/hooks'
 import FilterBar from '../components/FilterBar'
 import DataTable from '../components/DataTable'
-import ColumnSelector, { useVisibleColumns } from '../components/ColumnSelector'
+import ColumnSelector from '../components/ColumnSelector'
+import { useVisibleColumns } from '../components/columns'
 import Skeleton from '../components/Skeleton'
 import ErrorMessage from '../components/ErrorMessage'
 

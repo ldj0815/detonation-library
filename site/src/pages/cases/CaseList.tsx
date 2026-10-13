@@ -1,16 +1,15 @@
 import { useSearchParams } from 'react-router-dom'
-import { useCaseList } from '../../api/cases'
-import { useAdmin } from '../../context/AdminContext'
+import { useCaseList } from '../../data/hooks'
 import FilterBar from '../../components/FilterBar'
 import DataTable from '../../components/DataTable'
-import ColumnSelector, { useVisibleColumns } from '../../components/ColumnSelector'
+import ColumnSelector from '../../components/ColumnSelector'
+import { useVisibleColumns } from '../../components/columns'
 import Skeleton from '../../components/Skeleton'
 import ErrorMessage from '../../components/ErrorMessage'
 
 const LIMIT = 25
 
 export default function CaseList() {
-  const { isAdmin } = useAdmin()
   const [params, setParams] = useSearchParams()
   const { visible, toggle } = useVisibleColumns()
 
@@ -32,7 +31,6 @@ export default function CaseList() {
     has_critical_hd: params.get('has_critical_hd') === 'true' ? true : undefined,
     has_min_hd: params.get('has_min_hd') === 'true' ? true : undefined,
     has_critical_energy: params.get('has_critical_energy') === 'true' ? true : undefined,
-    show_hidden: isAdmin ? true : undefined,
     sort_by: params.get('sort_by') ?? undefined,
     sort_dir: params.get('sort_dir') ?? undefined,
     limit: LIMIT,

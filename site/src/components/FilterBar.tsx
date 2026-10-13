@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useFilterOptions } from '../api/cases'
+import { useFilterOptions } from '../data/hooks'
 import type { FilterOption } from '../types/case'
 
 interface FilterBarProps {

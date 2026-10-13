@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
-import { useAllCases } from '../../api/cases'
+import { useAllCases } from '../../data/hooks'
 import FilterBar from '../../components/FilterBar'
 import Skeleton from '../../components/Skeleton'
 import ErrorMessage from '../../components/ErrorMessage'
@@ -296,9 +296,6 @@ export default function PlotPage() {
 
         {isLoading && <Skeleton rows={8} />}
         {isError && <ErrorMessage message="Failed to load data." onRetry={refetch} />}
-        {data && data.truncated && (
-          <p className="text-yellow-700 text-xs mb-2">Showing the first {data.items.length.toLocaleString()} matching cases — narrow the filters to plot all matches.</p>
-        )}
         {data && validItems.length === 0 && (
           <p className="text-gray-500 py-8 text-center">No data to plot. Adjust filters or select different axes.</p>
         )}

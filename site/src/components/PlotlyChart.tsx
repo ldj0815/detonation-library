@@ -15,7 +15,7 @@ export default function PlotlyChart({ data, layout, className = '', onPointClick
   const wrapperRef = useRef<HTMLDivElement>(null)
   const initialized = useRef(false)
   const onPointClickRef = useRef(onPointClick)
-  onPointClickRef.current = onPointClick
+  useEffect(() => { onPointClickRef.current = onPointClick }, [onPointClick])
   const [rendering, setRendering] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [height, setHeight] = useState(400)
@@ -40,11 +40,6 @@ export default function PlotlyChart({ data, layout, className = '', onPointClick
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-    // Only show the spinner on the very first draw; subsequent Plotly.react
-    // updates are in-place and fast, so no teardown/flash.
-    if (!initialized.current) setRendering(true)
-    setError(null)
-
     const fullLayout = {
       autosize: true,
       margin: { l: 60, r: 20, t: 30, b: 60 },
@@ -56,7 +51,10 @@ export default function PlotlyChart({ data, layout, className = '', onPointClick
 
     Plotly.react(el, data, fullLayout, { displaylogo: false, responsive: true })
       .then(() => {
+        // The spinner shows only until the first draw finishes; later
+        // Plotly.react updates are in-place and fast, so no teardown/flash.
         setRendering(false)
+        setError(null)
         if (!initialized.current) {
           initialized.current = true
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

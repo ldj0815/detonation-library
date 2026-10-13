@@ -30,7 +30,6 @@ export interface CaseListItem {
   doi_reference: string | null
   sharing_link: string | null
   created_at: string
-  hidden: boolean
 }
 
 export interface CaseDetail extends CaseListItem {
