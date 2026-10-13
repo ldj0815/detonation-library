@@ -8,6 +8,7 @@ const CaseList = lazy(() => import('./pages/cases/CaseList'))
 const CaseDetail = lazy(() => import('./pages/cases/CaseDetail'))
 const BrowsePage = lazy(() => import('./pages/browse/BrowsePage'))
 const PlotPage = lazy(() => import('./pages/plot/PlotPage'))
+const Contribute = lazy(() => import('./pages/Contribute'))
 const About = lazy(() => import('./pages/About'))
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
               <Route path="/browse/min-hd" element={<BrowsePage mode="min-hd" />} />
               <Route path="/browse/critical-energy" element={<BrowsePage mode="critical-energy" />} />
               <Route path="/plot" element={<PlotPage />} />
+              <Route path="/contribute" element={<Contribute />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
