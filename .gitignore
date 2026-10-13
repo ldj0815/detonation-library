@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Site
+node_modules/
+site/dist/
+
+# Generated from data/cases.csv by scripts/build_data.py
+site/public/cases.json
+site/public/cases.csv
+
+.DS_Store
