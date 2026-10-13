@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@theme {
+  --color-uci-dark-blue: #1B3D6E;
+  --color-uci-blue: #0064A4;
+  --color-uci-gold: #FFD200;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
