@@ -1,5 +1,6 @@
 import { useParams, Link, useLocation } from 'react-router-dom'
 import { useCaseDetail } from '../../data/hooks'
+import { NEW_ISSUE_URL } from '../../config'
 import Badge from '../../components/Badge'
 import Skeleton from '../../components/Skeleton'
 import ErrorMessage from '../../components/ErrorMessage'
@@ -176,6 +177,12 @@ export default function CaseDetail() {
           <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{data.notes}</p>
         </div>
       )}
+
+      {/* Correction notice */}
+      <p className="text-sm text-gray-500 border-t border-gray-100 pt-6">
+        To correct this data,{' '}
+        <a href={NEW_ISSUE_URL} target="_blank" rel="noopener noreferrer" className="text-uci-blue underline">open an issue on GitHub</a>.
+      </p>
 
       <div className="mt-4">
         <Link to="/cases" className="text-sm text-uci-blue underline">&larr; Back to All Cases</Link>
