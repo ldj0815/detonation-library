@@ -18,6 +18,7 @@
   --accent: #0064a4;
   --accent-ink: #1b3d6e;
   --accent-soft: #e4eff8;
+  --on-accent: #ffffff;
   --mark: #ffd200;
   --ok: #1e7f4f;
   --ok-soft: #e3f3ea;
@@ -25,58 +26,68 @@
   --warn-soft: #fff3d6;
   --danger: #b3261e;
   --danger-soft: #fbe9e7;
+  --on-danger: #ffffff;
   --plot-grid: #e6eaf0;
+  --select-arrow: #51607a;
   --shadow-menu: 0 8px 24px rgba(19, 32, 58, 0.12), 0 1px 2px rgba(19, 32, 58, 0.08);
   color-scheme: light;
 }
 
+/* Dark values: deep navy surfaces, a lighter accent so links and controls keep
+   their contrast, dark text on the accent instead of white. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1726;
-    --surface: #151f33;
-    --surface-2: #1b2740;
-    --ink: #e7ecf4;
-    --ink-2: #a8b4c8;
-    --ink-3: #6f7d95;
-    --line: #273450;
-    --line-2: #354764;
-    --accent: #7bbcee;
-    --accent-ink: #a9d3f5;
-    --accent-soft: #1c3050;
-    --mark: #ffd200;
-    --ok: #5fc78f;
-    --ok-soft: #173427;
-    --warn: #f0b64a;
-    --warn-soft: #3a2b0a;
-    --danger: #f28b82;
-    --danger-soft: #3f1d1a;
-    --plot-grid: #273450;
-    --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+    --bg: #0e1522;
+    --surface: #141d2e;
+    --surface-2: #1b2639;
+    --ink: #e8edf5;
+    --ink-2: #aab6ca;
+    --ink-3: #7a889f;
+    --line: #26324a;
+    --line-2: #38465f;
+    --accent: #7fbff0;
+    --accent-ink: #b3d8f7;
+    --accent-soft: #1b2f4d;
+    --on-accent: #0b1424;
+    --mark: #f4cf35;
+    --ok: #6ccf9a;
+    --ok-soft: #17352a;
+    --warn: #f2bf5a;
+    --warn-soft: #3b2d0f;
+    --danger: #f59a92;
+    --danger-soft: #42211e;
+    --on-danger: #2a0f0c;
+    --plot-grid: #26324a;
+    --select-arrow: #aab6ca;
+    --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #0f1726;
-  --surface: #151f33;
-  --surface-2: #1b2740;
-  --ink: #e7ecf4;
-  --ink-2: #a8b4c8;
-  --ink-3: #6f7d95;
-  --line: #273450;
-  --line-2: #354764;
-  --accent: #7bbcee;
-  --accent-ink: #a9d3f5;
-  --accent-soft: #1c3050;
-  --mark: #ffd200;
-  --ok: #5fc78f;
-  --ok-soft: #173427;
-  --warn: #f0b64a;
-  --warn-soft: #3a2b0a;
-  --danger: #f28b82;
-  --danger-soft: #3f1d1a;
-  --plot-grid: #273450;
-  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --bg: #0e1522;
+  --surface: #141d2e;
+  --surface-2: #1b2639;
+  --ink: #e8edf5;
+  --ink-2: #aab6ca;
+  --ink-3: #7a889f;
+  --line: #26324a;
+  --line-2: #38465f;
+  --accent: #7fbff0;
+  --accent-ink: #b3d8f7;
+  --accent-soft: #1b2f4d;
+  --on-accent: #0b1424;
+  --mark: #f4cf35;
+  --ok: #6ccf9a;
+  --ok-soft: #17352a;
+  --warn: #f2bf5a;
+  --warn-soft: #3b2d0f;
+  --danger: #f59a92;
+  --danger-soft: #42211e;
+  --on-danger: #2a0f0c;
+  --plot-grid: #26324a;
+  --select-arrow: #aab6ca;
+  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
   color-scheme: dark;
 }
 
@@ -99,6 +110,7 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
   --color-mark: var(--mark);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
@@ -109,75 +121,78 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Base
+   Base. In the `base` layer so that component classes (`.btn-primary` on a
+   link, for example) override the element defaults below.
    --------------------------------------------------------------------------- */
 
-html {
-  background: var(--bg);
+@layer base {
+  html {
+    background: var(--bg);
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  ::placeholder {
+    color: var(--ink-3);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
 }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-h1, h2, h3, h4 {
-  color: var(--ink);
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover {
-  color: var(--accent-ink);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-::placeholder {
-  color: var(--ink-3);
-}
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-::selection {
-  background: var(--accent-soft);
-}
-
-.tnum {
+@utility tnum {
   font-variant-numeric: tabular-nums;
 }
 
-.no-scrollbar {
-  scrollbar-width: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.num {
+@utility num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -216,6 +231,7 @@ a:hover {
     line-height: 1;
     white-space: nowrap;
     cursor: pointer;
+    text-decoration: none;
     transition: background-color 120ms, border-color 120ms, color 120ms;
   }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -225,11 +241,9 @@ a:hover {
 
   .btn-primary {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
   }
-  .btn-primary:hover:not(:disabled) { background: var(--accent-ink); color: #fff; }
-  :root[data-theme="dark"] .btn-primary,
-  :root:not([data-theme="light"]) .btn-primary { color: var(--bg); }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-ink); color: var(--on-accent); }
 
   .btn-secondary {
     background: var(--surface);
@@ -246,9 +260,9 @@ a:hover {
 
   .btn-danger {
     background: var(--danger);
-    color: #fff;
+    color: var(--on-danger);
   }
-  .btn-danger:hover:not(:disabled) { filter: brightness(0.92); color: #fff; }
+  .btn-danger:hover:not(:disabled) { filter: brightness(0.92); color: var(--on-danger); }
 
   .input, .select, .textarea {
     width: 100%;
@@ -274,6 +288,15 @@ a:hover {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2351607a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
     background-repeat: no-repeat;
     background-position: right 8px center;
+  }
+  /* Lighter arrow on dark surfaces. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aab6ca' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    }
+  }
+  :root[data-theme="dark"] .select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aab6ca' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
   }
 
   .field-label {
@@ -307,7 +330,7 @@ a:hover {
     color: inherit;
     cursor: pointer;
   }
-  .chip button:hover { background: var(--accent); color: #fff; }
+  .chip button:hover { background: var(--accent); color: var(--on-accent); }
 
   .badge {
     display: inline-flex;
