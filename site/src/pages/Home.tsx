@@ -1,57 +1,159 @@
-import { Link } from 'react-router-dom'
-import { useCaseCounts } from '../data/hooks'
-import Skeleton from '../components/Skeleton'
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useCategoryCounts, useFilterOptions } from '../data/hooks'
+import SootFoil from '../components/SootFoil'
+import Icon from '../components/Icon'
+import { CATEGORIES } from '../lib/categories'
+import { fmtCount, GALCIT_DB_URL, GALCIT_REPORT_DOI } from '../lib/format'
 
-interface CountCardProps {
-  label: string
-  value: number | undefined
-}
+const EXAMPLES = [
+  { label: 'H2 / O2', to: '/cases?fuel=H2&oxidizer=O2' },
+  { label: 'C2H4 cell width', to: '/browse/cell-size?fuel=C2H4' },
+  { label: 'N2O as oxidizer', to: '/cases?oxidizer=N2O' },
+  { label: 'Bull (1982)', to: '/cases?q=Bull' },
+  { label: 'below 20 kPa', to: '/cases?pressure_max=20' },
+]
 
-function CountCard({ label, value }: CountCardProps) {
-  return (
-    <div className="border border-gray-200 rounded-lg p-5 bg-white shadow-sm">
-      <div className="text-3xl font-bold font-mono text-uci-dark-blue">{value ?? '–'}</div>
-      <div className="text-sm text-gray-600 mt-1">{label}</div>
-    </div>
+function Stat({ value, label, to }: { value: number | undefined; label: string; to?: string }) {
+  const inner = (
+    <>
+      <span className="num block text-[26px] md:text-[30px] font-medium leading-none text-ink">{value == null ? <span className="skeleton inline-block h-7 w-16 align-middle" /> : fmtCount(value)}</span>
+      <span className="mt-1.5 block text-[13px] text-ink-2">{label}</span>
+    </>
   )
+  const cls = 'block py-4 md:py-5 md:px-6 md:first:pl-0 md:last:pr-0 hover:no-underline'
+  return to ? <Link to={to} className={`${cls} hover:[&>span:first-child]:text-accent`}>{inner}</Link> : <div className={cls}>{inner}</div>
 }
 
 export default function Home() {
-  const { total, rde, isLoading } = useCaseCounts()
+  const navigate = useNavigate()
+  const [q, setQ] = useState('')
+  const counts = useCategoryCounts()
+  const opts = useFilterOptions()
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    const term = q.trim()
+    navigate(term ? `/cases?q=${encodeURIComponent(term)}` : '/cases')
+  }
+
+  const measurementCategories = CATEGORIES.filter(c => c.field)
+  const rde = CATEGORIES.find(c => c.mode === 'rde')
 
   return (
-    <div className="p-8 max-w-3xl">
-      <h1 className="text-3xl font-bold text-uci-dark-blue mb-4">Detonation Science and Technology Library</h1>
-      <p className="text-gray-700 mb-6 leading-relaxed">
-        A curated collection of combustion and detonation data from researchers and
-        collaborating institutions. Browse experimental results including cell size measurements,
-        critical diameters, RDE data, and more.
-      </p>
-
-      <div className="flex flex-wrap items-center gap-4 mb-8">
-        <Link
-          to="/search"
-          className="inline-block bg-uci-blue text-white px-5 py-2.5 rounded font-semibold hover:bg-uci-dark-blue transition-colors"
-        >
-          Search All Cases &rarr;
-        </Link>
-        <a
-          href={`${import.meta.env.BASE_URL}cases.csv`}
-          download="detonation-library-cases.csv"
-          className="text-sm text-uci-blue underline hover:no-underline"
-        >
-          Download full dataset (CSV)
-        </a>
-      </div>
-
-      {isLoading ? (
-        <Skeleton rows={4} />
-      ) : (
-        <div className="grid grid-cols-2 gap-4">
-          <CountCard label="Total Cases" value={total} />
-          <CountCard label="RDE Cases" value={rde} />
+    <div>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-line bg-surface">
+        <SootFoil className="absolute inset-0 w-full h-full" cell={46} opacity={0.9} />
+        <div className="container-x relative py-14 md:py-20">
+          <h1 className="text-[34px] md:text-[46px] font-semibold leading-[1.08] max-w-[16ch]">
+            Gaseous detonation data, searchable.
+          </h1>
+          <p className="mt-5 text-[15px] md:text-[17px] text-ink-2 max-w-[58ch] leading-relaxed">
+            Cell sizes, critical and minimum tube diameters and critical initiation energies,
+            transcribed from the GALCIT Detonation Database and searchable by mixture, initial
+            conditions and reference. Every value carries its original citation.
+          </p>
+          <form onSubmit={submit} role="search" className="mt-7 flex max-w-[560px] gap-2">
+            <label className="relative flex-1">
+              <span className="sr-only">Search cases</span>
+              <Icon name="search" size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
+              <input
+                type="search"
+                value={q}
+                onChange={e => setQ(e.target.value)}
+                placeholder="Fuel, oxidizer, diluent or author"
+                className="input h-[44px] pl-10 text-[15px]"
+                autoComplete="off"
+              />
+            </label>
+            <button type="submit" className="btn btn-primary btn-lg">Search</button>
+          </form>
+          <p className="mt-3 text-[13px] text-ink-2">
+            Try{' '}
+            {EXAMPLES.map((ex, i) => (
+              <span key={ex.to}>
+                <Link to={ex.to} className="text-accent underline underline-offset-2 decoration-line-2 hover:decoration-accent">{ex.label}</Link>
+                {i < EXAMPLES.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </p>
         </div>
-      )}
+      </section>
+
+      {/* Numbers */}
+      <section className="border-b border-line bg-surface">
+        <div className="container-x grid grid-cols-2 md:flex md:divide-x md:divide-line">
+          <Stat value={counts.data?.all} label="cases" to="/cases" />
+          <Stat value={counts.data?.['cell-size']} label="cell width measurements" to="/browse/cell-size" />
+          <Stat value={counts.data?.['critical-hd']} label="critical tube diameters" to="/browse/critical-hd" />
+          <Stat value={counts.data?.['critical-energy']} label="critical initiation energies" to="/browse/critical-energy" />
+          <Stat value={opts.data ? opts.data.fuels.length : undefined} label="fuels" />
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="container-x py-10 md:py-14">
+        <h2 className="text-[20px] font-semibold">What is in the library</h2>
+        <p className="mt-1 text-[14px] text-ink-2 max-w-[64ch]">
+          Four kinds of measurement, each tied to a fuel, an oxidizer, an equivalence ratio and
+          the initial pressure and temperature. Open a category to filter it.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {measurementCategories.map(c => (
+            <Link key={c.mode} to={c.path} className="panel group flex flex-col p-5 hover:no-underline hover:border-accent transition-colors">
+              <span className="text-[16px] font-semibold text-ink group-hover:text-accent">{c.label}</span>
+              <span className="mt-2 text-[13.5px] text-ink-2 leading-relaxed flex-1">{c.description}</span>
+              <span className="mt-4 text-[13px] text-ink-2">
+                <span className="num text-ink">{counts.data ? fmtCount(counts.data[c.mode]) : '…'}</span> cases
+                <Icon name="arrowRight" size={13} className="inline ml-1.5 text-ink-3 group-hover:text-accent" />
+              </span>
+            </Link>
+          ))}
+        </div>
+        {rde && (
+          <p className="mt-4 text-[13px] text-ink-2">
+            A category for <Link to={rde.path}>rotating detonation engine runs</Link> is ready for contributed data.
+          </p>
+        )}
+      </section>
+
+      {/* Source and contribute */}
+      <section className="border-t border-line bg-surface">
+        <div className="container-x py-10 md:py-14 grid gap-10 md:grid-cols-2">
+          <div>
+            <h2 className="text-[20px] font-semibold">Where the data comes from</h2>
+            <p className="mt-2 text-[14px] text-ink-2 leading-relaxed max-w-[60ch]">
+              The cases were transcribed from the tables of the GALCIT Detonation Database compiled
+              at Caltech's Explosion Dynamics Laboratory. Each case keeps its original dataset key and
+              reference number, so a value can be traced back to the paper it was measured in.
+            </p>
+            <blockquote className="mt-4 panel px-4 py-3 text-[13.5px] leading-relaxed max-w-[60ch]">
+              M. Kaneshige and J. E. Shepherd. <em>Detonation Database.</em> Technical Report FM97-8,
+              GALCIT, California Institute of Technology, July 1997.{' '}
+              <a href={GALCIT_REPORT_DOI} target="_blank" rel="noopener noreferrer">doi:10.7907/g3gs-4y69</a>.{' '}
+              <a href={GALCIT_DB_URL} target="_blank" rel="noopener noreferrer">Online version</a>.
+            </blockquote>
+            <p className="mt-3 text-[13px] text-ink-2">
+              When you use a specific value, cite the publication in the case's reference rather than this library.{' '}
+              <Link to="/about">More on citing</Link>.
+            </p>
+          </div>
+          <div>
+            <h2 className="text-[20px] font-semibold">Use the data, add to it</h2>
+            <p className="mt-2 text-[14px] text-ink-2 leading-relaxed max-w-[56ch]">
+              The whole library is one CSV file you can download and work with directly. New
+              cell-size, diameter, energy or RDE measurements from your own experiments go in through
+              the same template: fill one row per case and send the file through GitHub.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <a href={`${import.meta.env.BASE_URL}cases.csv`} download="detonation-library-cases.csv" className="btn btn-primary hover:no-underline"><Icon name="download" size={15} /> Download all cases (CSV)</a>
+              <Link to="/contribute" className="btn btn-secondary hover:no-underline"><Icon name="upload" size={15} /> Contribute data</Link>
+              <Link to="/plot" className="btn btn-secondary hover:no-underline"><Icon name="chart" size={15} /> Plot the data</Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

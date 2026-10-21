@@ -1,3 +1,5 @@
+import Icon from './Icon'
+
 interface ErrorMessageProps {
   message: string
   onRetry?: () => void
@@ -5,14 +7,12 @@ interface ErrorMessageProps {
 
 export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
   return (
-    <div className="p-4 border border-red-200 rounded bg-red-50 text-red-700 flex items-center gap-3">
+    <div role="alert" className="flex items-center gap-3 rounded-[10px] border border-danger/30 bg-danger-soft px-4 py-3 text-[13.5px] text-danger">
+      <Icon name="alert" size={16} className="shrink-0" />
       <span className="flex-1">{message}</span>
       {onRetry && (
-        <button
-          onClick={onRetry}
-          className="text-sm underline hover:no-underline shrink-0"
-        >
-          Retry
+        <button type="button" onClick={onRetry} className="btn btn-secondary btn-sm shrink-0">
+          Try again
         </button>
       )}
     </div>

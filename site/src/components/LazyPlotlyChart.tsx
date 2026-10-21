@@ -9,7 +9,7 @@ class ChartErrorBoundary extends Component<{ children: ReactNode }, { error: str
   state = { error: null as string | null }
   static getDerivedStateFromError(err: Error) { return { error: err.message } }
   render() {
-    if (this.state.error) return <p className="text-red-500 text-sm p-4">Chart error: {this.state.error}</p>
+    if (this.state.error) return <p className="text-[13px] text-danger p-4" role="alert">The chart could not be drawn: {this.state.error}</p>
     return this.props.children
   }
 }
@@ -26,7 +26,7 @@ interface LazyPlotlyChartProps {
 export default function LazyPlotlyChart(props: LazyPlotlyChartProps) {
   return (
     <ChartErrorBoundary>
-      <Suspense fallback={<div className="text-sm text-gray-400 p-4">Loading chart…</div>}>
+      <Suspense fallback={<div className="text-[13px] text-ink-2 p-4">Loading the chart…</div>}>
         <PlotlyChartInner {...props} />
       </Suspense>
     </ChartErrorBoundary>

@@ -1,17 +1,17 @@
 interface BadgeProps {
   label: string
-  variant?: 'setup' | 'neutral'
+  variant?: 'setup' | 'neutral' | 'accent' | 'ok' | 'warn' | 'danger'
 }
 
 const variants: Record<string, string> = {
-  setup: 'bg-uci-blue text-white',
-  neutral: 'bg-gray-100 text-gray-700',
+  setup: 'badge badge-accent',
+  accent: 'badge badge-accent',
+  neutral: 'badge',
+  ok: 'badge badge-ok',
+  warn: 'badge badge-warn',
+  danger: 'badge badge-danger',
 }
 
 export default function Badge({ label, variant = 'neutral' }: BadgeProps) {
-  return (
-    <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wide ${variants[variant] ?? variants.neutral}`}>
-      {label}
-    </span>
-  )
+  return <span className={variants[variant] ?? variants.neutral}>{label}</span>
 }

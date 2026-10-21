@@ -1,8 +1,404 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Design tokens. The palette lives in CSS variables so the dark theme is the
+   same variables re-valued; `@theme inline` lets Tailwind utilities such as
+   `bg-surface` or `text-ink-2` resolve to the variables at use time.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #eff2f6;
+  --ink: #13203a;
+  --ink-2: #51607a;
+  --ink-3: #8a96ab;
+  --line: #dfe4ec;
+  --line-2: #c4cedb;
+  --accent: #0064a4;
+  --accent-ink: #1b3d6e;
+  --accent-soft: #e4eff8;
+  --mark: #ffd200;
+  --ok: #1e7f4f;
+  --ok-soft: #e3f3ea;
+  --warn: #8a5300;
+  --warn-soft: #fff3d6;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+  --plot-grid: #e6eaf0;
+  --shadow-menu: 0 8px 24px rgba(19, 32, 58, 0.12), 0 1px 2px rgba(19, 32, 58, 0.08);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1726;
+    --surface: #151f33;
+    --surface-2: #1b2740;
+    --ink: #e7ecf4;
+    --ink-2: #a8b4c8;
+    --ink-3: #6f7d95;
+    --line: #273450;
+    --line-2: #354764;
+    --accent: #7bbcee;
+    --accent-ink: #a9d3f5;
+    --accent-soft: #1c3050;
+    --mark: #ffd200;
+    --ok: #5fc78f;
+    --ok-soft: #173427;
+    --warn: #f0b64a;
+    --warn-soft: #3a2b0a;
+    --danger: #f28b82;
+    --danger-soft: #3f1d1a;
+    --plot-grid: #273450;
+    --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1726;
+  --surface: #151f33;
+  --surface-2: #1b2740;
+  --ink: #e7ecf4;
+  --ink-2: #a8b4c8;
+  --ink-3: #6f7d95;
+  --line: #273450;
+  --line-2: #354764;
+  --accent: #7bbcee;
+  --accent-ink: #a9d3f5;
+  --accent-soft: #1c3050;
+  --mark: #ffd200;
+  --ok: #5fc78f;
+  --ok-soft: #173427;
+  --warn: #f0b64a;
+  --warn-soft: #3a2b0a;
+  --danger: #f28b82;
+  --danger-soft: #3f1d1a;
+  --plot-grid: #273450;
+  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
 @theme {
-  --color-uci-dark-blue: #1B3D6E;
-  --color-uci-blue: #0064A4;
-  --color-uci-gold: #FFD200;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-ctl: 6px;
+  --radius-panel: 10px;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-mark: var(--mark);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+::placeholder {
+  color: var(--ink-3);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Shared components
+   --------------------------------------------------------------------------- */
+
+@layer components {
+  .container-x {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 768px) {
+    .container-x { padding-inline: 24px; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: var(--radius-ctl);
+    border: 1px solid transparent;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 120ms, border-color 120ms, color 120ms;
+  }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn:hover { text-decoration: none; }
+  .btn-sm { height: 28px; padding: 0 10px; font-size: 12.5px; }
+  .btn-lg { height: 42px; padding: 0 18px; font-size: 14.5px; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-ink); color: #fff; }
+  :root[data-theme="dark"] .btn-primary,
+  :root:not([data-theme="light"]) .btn-primary { color: var(--bg); }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border-color: var(--line-2);
+  }
+  .btn-secondary:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-2);
+  }
+  .btn-ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+  }
+  .btn-danger:hover:not(:disabled) { filter: brightness(0.92); color: #fff; }
+
+  .input, .select, .textarea {
+    width: 100%;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-ctl);
+    font-size: 13.5px;
+    padding: 0 10px;
+    height: 34px;
+    transition: border-color 120ms, box-shadow 120ms;
+  }
+  .textarea { height: auto; padding: 8px 10px; line-height: 1.5; }
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .input-sm, .select-sm { height: 28px; font-size: 12.5px; padding: 0 8px; }
+  .select {
+    appearance: none;
+    padding-right: 26px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2351607a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 4px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 8px 0 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .chip button {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: inherit;
+    cursor: pointer;
+  }
+  .chip button:hover { background: var(--accent); color: #fff; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 500;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .badge-accent { background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
+  .badge-ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+  .badge-warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+  .badge-danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+
+  .menu {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-menu);
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+  }
+
+  .kv {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 16px;
+    row-gap: 6px;
+    font-size: 13.5px;
+  }
+  .kv dt { color: var(--ink-2); white-space: nowrap; }
+  .kv dd { margin: 0; color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+  }
+  .data-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-weight: 500;
+    font-size: 12.5px;
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    user-select: none;
+  }
+  .data-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: 0; }
+  .data-table tbody tr { transition: background-color 80ms; }
+  .data-table tbody tr.row-link { cursor: pointer; }
+  .data-table tbody tr.row-link:hover { background: var(--accent-soft); }
+  .data-table th.col-num, .data-table td.col-num { text-align: right; }
+  .data-table td.col-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .data-table th.sortable { cursor: pointer; }
+  .data-table th.sortable:hover { color: var(--ink); }
+  .data-table th.sorted { color: var(--accent-ink); }
+  .cell-empty { color: var(--ink-3); }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .prose-sm p { margin-bottom: 0.75em; max-width: 72ch; }
+  .prose-sm a { text-decoration: underline; text-underline-offset: 2px; }
 }

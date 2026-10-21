@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { loadCases } from './loadCases'
 import { filterCases, filterOptions, queryCases, sortCases } from './query'
 import type { CaseListParams } from './query'
+import { CATEGORIES, type BrowseMode } from '../lib/categories'
 import type { CaseDetail, FilterOptions } from '../types/case'
 import type { PaginatedResponse } from '../types/common'
 
@@ -35,13 +36,14 @@ export interface AllCasesResult {
   total: number
 }
 
-// Every matching case, unpaged, for the plot.
+// Every matching case, unpaged, for the plot and the CSV export.
 export function useAllCases(params: CaseListParams): Loaded<AllCasesResult> {
   const cases = useCases()
   const key = JSON.stringify(params)
   const data = useMemo(() => {
     if (!cases.data) return undefined
-    const items = sortCases(filterCases(cases.data, JSON.parse(key) as CaseListParams))
+    const p = JSON.parse(key) as CaseListParams
+    const items = sortCases(filterCases(cases.data, p), p.sort_by, p.sort_dir)
     return { items, total: items.length }
   }, [cases.data, key])
   return { data, isLoading: cases.isLoading, isError: cases.isError, refetch: cases.refetch }
@@ -65,8 +67,15 @@ export function useFilterOptions(): { data: FilterOptions | undefined } {
   return { data }
 }
 
-export function useCaseCounts(): { total: number | undefined; rde: number | undefined; isLoading: boolean } {
+/** Case count per browse category. */
+export function useCategoryCounts(): { data: Record<BrowseMode, number> | undefined } {
   const cases = useCases()
-  const rde = useMemo(() => cases.data?.filter(c => c.setup === 'rde').length, [cases.data])
-  return { total: cases.data?.length, rde, isLoading: cases.isLoading }
+  const data = useMemo(() => {
+    if (!cases.data) return undefined
+    const all = cases.data
+    return Object.fromEntries(
+      CATEGORIES.map(c => [c.mode, filterCases(all, c.filter).length]),
+    ) as Record<BrowseMode, number>
+  }, [cases.data])
+  return { data }
 }

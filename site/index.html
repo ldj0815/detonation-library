@@ -2,9 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detonation Science and Technology Library</title>
+    <meta name="description" content="Searchable library of gaseous detonation data: cell sizes, critical and minimum tube diameters and critical initiation energies, transcribed from the GALCIT Detonation Database." />
+    <script>
+      // Apply a saved theme before first paint. A `theme=light|dark` query
+      // parameter (also after the #/route) forces the theme for this page load
+      // only, without changing the saved preference.
+      try {
+        var search = location.search || '';
+        var hashQuery = location.hash.indexOf('?') >= 0 ? location.hash.slice(location.hash.indexOf('?')) : '';
+        var q = new URLSearchParams(search).get('theme') || new URLSearchParams(hashQuery).get('theme');
+        var t = (q === 'dark' || q === 'light') ? q : localStorage.getItem('theme');
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
