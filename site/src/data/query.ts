@@ -83,7 +83,7 @@ export function filterCases(cases: CaseDetail[], params: CaseListParams): CaseDe
     inRange(c.equivalence_ratio, params.equivalence_ratio_min, params.equivalence_ratio_max) &&
     inRange(c.initial_pressure_kpa, params.pressure_min, params.pressure_max) &&
     inRange(c.initial_temperature_k, params.temperature_min, params.temperature_max) &&
-    (params.has_cell_size !== true || c.cell_width_mm !== null) &&
+    (params.has_cell_size !== true || c.cell_width_mm !== null || c.cell_length_mm !== null) &&
     (params.has_critical_hd !== true || c.critical_hydraulic_diameter_mm !== null) &&
     (params.has_min_hd !== true || c.minimum_hydraulic_diameter_mm !== null) &&
     (params.has_critical_energy !== true || c.critical_energy_j !== null)

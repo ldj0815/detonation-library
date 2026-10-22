@@ -4,6 +4,7 @@ import { loadCases } from './loadCases'
 import { filterCases, filterOptions, queryCases, sortCases } from './query'
 import type { CaseListParams } from './query'
 import { CATEGORIES, type BrowseMode } from '../lib/categories'
+import { parseTitle } from '../lib/format'
 import type { CaseDetail, FilterOptions } from '../types/case'
 import type { PaginatedResponse } from '../types/common'
 
@@ -73,9 +74,36 @@ export function useCategoryCounts(): { data: Record<BrowseMode, number> | undefi
   const data = useMemo(() => {
     if (!cases.data) return undefined
     const all = cases.data
-    return Object.fromEntries(
-      CATEGORIES.map(c => [c.mode, filterCases(all, c.filter).length]),
-    ) as Record<BrowseMode, number>
+    return {
+      all: all.length,
+      ...Object.fromEntries(CATEGORIES.map(c => [c.mode, filterCases(all, c.filter).length])),
+    } as Record<BrowseMode, number>
+  }, [cases.data])
+  return { data }
+}
+
+export interface LibraryStats {
+  cases: number
+  withCellLength: number
+  /** Distinct references, by the reference in the title or else the DOI field. */
+  publications: number
+}
+
+/** The numbers on the landing page. */
+export function useLibraryStats(): { data: LibraryStats | undefined } {
+  const cases = useCases()
+  const data = useMemo(() => {
+    if (!cases.data) return undefined
+    const refs = new Set<string>()
+    for (const c of cases.data) {
+      const ref = parseTitle(c.title).reference ?? c.doi_reference
+      if (ref) refs.add(ref.trim().toLowerCase())
+    }
+    return {
+      cases: cases.data.length,
+      withCellLength: cases.data.filter(c => c.cell_length_mm != null).length,
+      publications: refs.size,
+    }
   }, [cases.data])
   return { data }
 }

@@ -13,6 +13,7 @@ import { countActiveFilters, listValues, numberParam } from '../../components/fi
 import { downloadCasesCsv } from '../../lib/csv'
 import { fmtCount } from '../../lib/format'
 import type { CaseListItem } from '../../types/case'
+import { HIDDEN_MEASUREMENTS } from '../../config'
 
 const AXIS_OPTIONS = [
   { value: 'initial_pressure_kpa', label: 'Initial pressure (kPa)' },
@@ -25,7 +26,7 @@ const AXIS_OPTIONS = [
   { value: 'critical_hydraulic_diameter_mm', label: 'Critical tube diameter (mm)' },
   { value: 'minimum_hydraulic_diameter_mm', label: 'Minimum tube diameter (mm)' },
   { value: 'critical_energy_j', label: 'Critical energy (J)' },
-]
+].filter(o => !HIDDEN_MEASUREMENTS.has(o.value))
 
 const GROUP_OPTIONS = [
   { value: '', label: 'Nothing' },

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useCategoryCounts, useFilterOptions } from '../data/hooks'
+import { useCategoryCounts, useFilterOptions, useLibraryStats } from '../data/hooks'
 import SootFoil from '../components/SootFoil'
 import Icon from '../components/Icon'
 import { CATEGORIES } from '../lib/categories'
@@ -30,6 +30,7 @@ export default function Home() {
   const [q, setQ] = useState('')
   const counts = useCategoryCounts()
   const opts = useFilterOptions()
+  const stats = useLibraryStats()
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -37,8 +38,7 @@ export default function Home() {
     navigate(term ? `/cases?q=${encodeURIComponent(term)}` : '/cases')
   }
 
-  const measurementCategories = CATEGORIES.filter(c => c.field)
-  const rde = CATEGORIES.find(c => c.mode === 'rde')
+  const categories = CATEGORIES.filter(c => c.mode !== 'all')
 
   return (
     <div>
@@ -50,9 +50,9 @@ export default function Home() {
             Gaseous detonation data, searchable.
           </h1>
           <p className="mt-5 text-[15px] md:text-[17px] text-ink-2 max-w-[58ch] leading-relaxed">
-            Cell sizes, critical and minimum tube diameters and critical initiation energies,
-            transcribed from the GALCIT Detonation Database and searchable by mixture, initial
-            conditions and reference. Every value carries its original citation.
+            Detonation cell widths and lengths measured on soot foils, transcribed from the
+            GALCIT Detonation Database and searchable by mixture, initial conditions and
+            reference. Every value carries its original citation.
           </p>
           <form onSubmit={submit} role="search" className="mt-7 flex max-w-[560px] gap-2">
             <label className="relative flex-1">
@@ -84,11 +84,10 @@ export default function Home() {
       {/* Numbers */}
       <section className="border-b border-line bg-surface">
         <div className="container-x grid grid-cols-2 md:flex md:divide-x md:divide-line">
-          <Stat value={counts.data?.all} label="cases" to="/cases" />
-          <Stat value={counts.data?.['cell-size']} label="cell width measurements" to="/browse/cell-size" />
-          <Stat value={counts.data?.['critical-hd']} label="critical tube diameters" to="/browse/critical-hd" />
-          <Stat value={counts.data?.['critical-energy']} label="critical initiation energies" to="/browse/critical-energy" />
+          <Stat value={stats.data?.cases} label="cell size cases" to="/browse/cell-size" />
+          <Stat value={stats.data?.withCellLength} label="with cell length" to="/browse/cell-size?sort_by=cell_length_mm&sort_dir=desc" />
           <Stat value={opts.data ? opts.data.fuels.length : undefined} label="fuels" />
+          <Stat value={stats.data?.publications} label="publications" />
         </div>
       </section>
 
@@ -96,26 +95,28 @@ export default function Home() {
       <section className="container-x py-10 md:py-14">
         <h2 className="text-[20px] font-semibold">What is in the library</h2>
         <p className="mt-1 text-[14px] text-ink-2 max-w-[64ch]">
-          Four kinds of measurement, each tied to a fuel, an oxidizer, an equivalence ratio and
-          the initial pressure and temperature. Open a category to filter it.
+          Each case ties a measurement to a fuel, an oxidizer, an equivalence ratio and the
+          initial pressure and temperature. Open a category to filter it.
         </p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {measurementCategories.map(c => (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 max-w-[760px]">
+          {categories.map(c => (
             <Link key={c.mode} to={c.path} className="panel group flex flex-col p-5 hover:no-underline hover:border-accent transition-colors">
-              <span className="text-[16px] font-semibold text-ink group-hover:text-accent">{c.label}</span>
-              <span className="mt-2 text-[13.5px] text-ink-2 leading-relaxed flex-1">{c.description}</span>
+              <span className="flex items-center gap-2 text-[16px] font-semibold text-ink group-hover:text-accent">
+                {c.label}
+                {c.placeholder && <span className="badge">Coming</span>}
+              </span>
+              <span className="mt-2 text-[13.5px] text-ink-2 leading-relaxed flex-1">
+                {c.placeholder ? `${c.description} Nothing contributed yet; this is where they will appear.` : c.description}
+              </span>
               <span className="mt-4 text-[13px] text-ink-2">
-                <span className="num text-ink">{counts.data ? fmtCount(counts.data[c.mode]) : '…'}</span> cases
+                {c.placeholder
+                  ? 'Contribute the first runs'
+                  : <><span className="num text-ink">{counts.data ? fmtCount(counts.data[c.mode]) : '…'}</span> cases</>}
                 <Icon name="arrowRight" size={13} className="inline ml-1.5 text-ink-3 group-hover:text-accent" />
               </span>
             </Link>
           ))}
         </div>
-        {rde && (
-          <p className="mt-4 text-[13px] text-ink-2">
-            A category for <Link to={rde.path}>rotating detonation engine runs</Link> is ready for contributed data.
-          </p>
-        )}
       </section>
 
       {/* Source and contribute */}
@@ -143,8 +144,8 @@ export default function Home() {
             <h2 className="text-[20px] font-semibold">Use the data, add to it</h2>
             <p className="mt-2 text-[14px] text-ink-2 leading-relaxed max-w-[56ch]">
               The whole library is one CSV file you can download and work with directly. New
-              cell-size, diameter, energy or RDE measurements from your own experiments go in through
-              the same template: fill one row per case and send the file through GitHub.
+              cell-size measurements or RDE runs from your own experiments go in through the same
+              template: fill one row per case and send the file through GitHub.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <a href={`${import.meta.env.BASE_URL}cases.csv`} download="detonation-library-cases.csv" className="btn btn-primary hover:no-underline"><Icon name="download" size={15} /> Download all cases (CSV)</a>

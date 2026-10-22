@@ -1,12 +1,23 @@
 # Detonation Science and Technology Library
 
-A curated, open collection of gaseous detonation data: cell sizes, critical and
-minimum tube diameters, and critical initiation energies. Browse, search, plot
-and download it here:
+A curated, open collection of gaseous detonation data, starting with detonation
+cell sizes. Browse, search, plot and download it here:
 
 **https://ldj0815.github.io/detonation-library/**
 
 The whole database is one file, [`data/cases.csv`](data/cases.csv).
+
+### What the site publishes for now
+
+The site currently shows cell widths and lengths, plus an empty category for
+rotating detonation engine runs. `data/cases.csv` also holds critical tube
+diameters, minimum tube diameters and critical initiation energies; those are
+kept in the file but not published yet. The switch is one list in two places:
+`HIDDEN_FIELDS` in [`scripts/build_data.py`](scripts/build_data.py), which
+leaves those columns empty in the published files and drops cases that carry
+nothing else, and `HIDDEN_MEASUREMENTS` in [`site/src/config.ts`](site/src/config.ts),
+which hides the matching tabs, columns, plot axes and export columns. Empty
+both lists to publish everything.
 
 ## Data source
 

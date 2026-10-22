@@ -1,4 +1,5 @@
 import type { CaseListItem } from '../types/case'
+import { HIDDEN_MEASUREMENTS } from '../config'
 
 export const CASE_CSV_COLUMNS = [
   'id', 'title', 'setup', 'geometry', 'fuel', 'oxidizer',
@@ -9,7 +10,7 @@ export const CASE_CSV_COLUMNS = [
   'critical_hydraulic_diameter_mm', 'minimum_hydraulic_diameter_mm', 'critical_energy_j',
   'tube_radius_mm', 'chamber_width_mm', 'chamber_height_mm',
   'contributor_name', 'doi_reference', 'sharing_link', 'created_at',
-]
+].filter(c => !HIDDEN_MEASUREMENTS.has(c))
 
 function escapeCsv(v: string): string {
   return /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v

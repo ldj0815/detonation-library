@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react'
 import AppHeader from './components/AppHeader'
 import AppFooter from './components/AppFooter'
 import Skeleton from './components/Skeleton'
+import { CATEGORIES } from './lib/categories'
 
 const Home = lazy(() => import('./pages/Home'))
 const BrowsePage = lazy(() => import('./pages/browse/BrowsePage'))
@@ -29,11 +30,10 @@ export default function App() {
             <Route path="/search" element={<BrowsePage mode="all" focusSearch />} />
             <Route path="/cases" element={<BrowsePage mode="all" />} />
             <Route path="/cases/:id" element={<CaseDetail />} />
-            <Route path="/browse/rde" element={<BrowsePage mode="rde" />} />
-            <Route path="/browse/cell-size" element={<BrowsePage mode="cell-size" />} />
-            <Route path="/browse/critical-hd" element={<BrowsePage mode="critical-hd" />} />
-            <Route path="/browse/min-hd" element={<BrowsePage mode="min-hd" />} />
-            <Route path="/browse/critical-energy" element={<BrowsePage mode="critical-energy" />} />
+            {CATEGORIES.filter(c => c.mode !== 'all').map(c => (
+              <Route key={c.mode} path={c.path} element={<BrowsePage mode={c.mode} />} />
+            ))}
+            <Route path="/browse/*" element={<Navigate to="/cases" replace />} />
             <Route path="/plot" element={<PlotPage />} />
             <Route path="/contribute" element={<Contribute />} />
             <Route path="*" element={<Navigate to="/" replace />} />

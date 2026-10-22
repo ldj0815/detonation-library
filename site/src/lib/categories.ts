@@ -1,4 +1,5 @@
 import type { CaseListParams } from '../data/query'
+import { HIDDEN_MEASUREMENTS } from '../config'
 
 export type BrowseMode = 'all' | 'cell-size' | 'critical-hd' | 'min-hd' | 'critical-energy' | 'rde'
 
@@ -13,9 +14,11 @@ export interface Category {
   /** Measurement column this category is about, if any. */
   field?: 'cell_width_mm' | 'critical_hydraulic_diameter_mm' | 'minimum_hydraulic_diameter_mm' | 'critical_energy_j'
   unit?: string
+  /** Listed before it has any data, to invite contributions. */
+  placeholder?: boolean
 }
 
-export const CATEGORIES: Category[] = [
+const ALL_CATEGORIES: Category[] = [
   {
     mode: 'all',
     path: '/cases',
@@ -65,9 +68,22 @@ export const CATEGORIES: Category[] = [
     label: 'RDE',
     description: 'Rotating detonation engine runs.',
     filter: { setup: 'rde' },
+    placeholder: true,
   },
 ]
 
+const measured = ALL_CATEGORIES.filter(c => c.field && !HIDDEN_MEASUREMENTS.has(c.field))
+const unmeasured = ALL_CATEGORIES.filter(c => !c.field && c.mode !== 'all')
+
+/** The categories the site shows. "All cases" only earns a place when there is
+ *  more than one kind of measurement to combine. */
+export const CATEGORIES: Category[] = measured.length > 1
+  ? [ALL_CATEGORIES[0], ...measured, ...unmeasured]
+  : [...measured, ...unmeasured]
+
+/** Where /cases and /search land. */
+export const DEFAULT_CATEGORY = CATEGORIES[0]
+
 export function categoryFor(mode: BrowseMode): Category {
-  return CATEGORIES.find(c => c.mode === mode) ?? CATEGORIES[0]
+  return CATEGORIES.find(c => c.mode === mode) ?? DEFAULT_CATEGORY
 }

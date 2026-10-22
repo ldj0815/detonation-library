@@ -93,6 +93,7 @@ describe('filterCases', () => {
 
   it('keeps rows that have the requested measurement', () => {
     expect(match({ has_cell_size: true })).toEqual([1])
+    expect(ids(filterCases([make(5, { cell_length_mm: 20 })], { has_cell_size: true }))).toEqual([5])
     expect(match({ has_critical_energy: true })).toEqual([3])
     expect(match({ has_critical_hd: true })).toEqual([])
     expect(match({ has_min_hd: true })).toEqual([])

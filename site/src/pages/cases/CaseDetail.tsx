@@ -9,6 +9,14 @@ import ErrorMessage from '../../components/ErrorMessage'
 import PageHeader from '../../components/PageHeader'
 import type { CaseDetail as CaseDetailType, CaseListItem } from '../../types/case'
 import { fmtNum, fmtDate, fmtMeasure, parseTitle, parseReference, mixtureLine, measurementsOf } from '../../lib/format'
+import { HIDDEN_MEASUREMENTS } from '../../config'
+
+// Columns of the series table beyond cell size, less the ones the site hides.
+const EXTRA_COLUMNS = ([
+  { key: 'critical_hydraulic_diameter_mm', label: 'Critical dia. (mm)' },
+  { key: 'minimum_hydraulic_diameter_mm', label: 'Minimum dia. (mm)' },
+  { key: 'critical_energy_j', label: 'Critical energy (J)' },
+] as const).filter(c => !HIDDEN_MEASUREMENTS.has(c.key))
 import { downloadText, toCsv, CASE_CSV_COLUMNS } from '../../lib/csv'
 
 function parseAdditional(value: string | null): { name: string; amount: string }[] {
@@ -77,9 +85,7 @@ function RelatedCases({ current }: { current: CaseDetailType }) {
               <th>Diluent</th>
               <th className="col-num">Cell width (mm)</th>
               <th className="col-num">Cell length (mm)</th>
-              <th className="col-num">Critical dia. (mm)</th>
-              <th className="col-num">Minimum dia. (mm)</th>
-              <th className="col-num">Critical energy (J)</th>
+              {EXTRA_COLUMNS.map(c => <th key={c.key} className="col-num">{c.label}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -95,9 +101,7 @@ function RelatedCases({ current }: { current: CaseDetailType }) {
                   <td>{i.primary_diluent_name ? `${i.primary_diluent_percentage != null ? `${fmtNum(i.primary_diluent_percentage)} % ` : ''}${i.primary_diluent_name}` : <span className="cell-empty">—</span>}</td>
                   <td className="col-num">{n(i.cell_width_mm, i.cell_width_uncertainty_mm)}</td>
                   <td className="col-num">{n(i.cell_length_mm, i.cell_length_uncertainty_mm)}</td>
-                  <td className="col-num">{n(i.critical_hydraulic_diameter_mm)}</td>
-                  <td className="col-num">{n(i.minimum_hydraulic_diameter_mm)}</td>
-                  <td className="col-num">{n(i.critical_energy_j)}</td>
+                  {EXTRA_COLUMNS.map(c => <td key={c.key} className="col-num">{n(i[c.key])}</td>)}
                 </tr>
               )
             })}

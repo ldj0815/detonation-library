@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { HIDDEN_MEASUREMENTS } from '../config'
 
 export interface ColumnDef {
   key: string
@@ -40,7 +41,7 @@ export const ALL_COLUMNS: ColumnDef[] = [
   { key: 'contributor_name', label: 'Contributor', defaultVisible: false },
   { key: 'sharing_link', label: 'Link', defaultVisible: false },
   { key: 'created_at', label: 'Added', defaultVisible: false },
-]
+].filter(c => !HIDDEN_MEASUREMENTS.has(c.key))
 
 export const DEFAULT_VISIBLE = new Set(ALL_COLUMNS.filter(c => c.defaultVisible).map(c => c.key))
 

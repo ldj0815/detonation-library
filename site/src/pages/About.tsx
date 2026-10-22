@@ -50,13 +50,13 @@ export default function About() {
           <p>
             Each case is one measurement of a detonable gas mixture: the fuel, oxidizer and
             equivalence ratio, any diluent or dopant, the initial pressure and temperature, the
-            setup and geometry, and the measured quantity. The measured quantities are cell width
-            and length, critical tube diameter, minimum tube diameter and critical initiation
-            energy. Every case names the publication it was taken from.
+            setup and geometry, and the measured detonation cell width or cell length. Every case
+            names the publication it was taken from. A category for rotating detonation engine
+            runs is in place and waits for contributed data.
           </p>
           <p>
-            Units are fixed across the library: pressures in kPa, temperatures in K, lengths in mm
-            and energies in J. The equivalence ratio is always the field <span className="num">equivalence_ratio</span>.
+            Units are fixed across the library: pressures in kPa, temperatures in K and lengths in
+            mm. The equivalence ratio is always the field <span className="num">equivalence_ratio</span>.
           </p>
         </section>
 

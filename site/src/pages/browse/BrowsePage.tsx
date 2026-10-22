@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { useCaseList, useAllCases, useCategoryCounts } from '../../data/hooks'
 import type { CaseListParams } from '../../data/query'
 import PageHeader from '../../components/PageHeader'
@@ -18,6 +18,7 @@ import { countActiveFilters, clearFilters, listValues, numberParam } from '../..
 import { categoryFor, type BrowseMode } from '../../lib/categories'
 import { downloadCasesCsv } from '../../lib/csv'
 import { fmtCount } from '../../lib/format'
+import { HIDDEN_MEASUREMENTS } from '../../config'
 
 const PAGE_SIZES = [25, 50, 100]
 
@@ -33,7 +34,7 @@ const SORT_OPTIONS = [
   { value: 'cell_width_mm:desc', label: 'Cell width, large to small' },
   { value: 'critical_hydraulic_diameter_mm:asc', label: 'Critical diameter, small to large' },
   { value: 'critical_energy_j:asc', label: 'Critical energy, low to high' },
-]
+].filter(o => !HIDDEN_MEASUREMENTS.has(o.value.split(':')[0]))
 
 interface BrowsePageProps {
   mode: BrowseMode
@@ -65,7 +66,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
     pressure_max: numberParam(params, 'pressure_max'),
     temperature_min: numberParam(params, 'temperature_min'),
     temperature_max: numberParam(params, 'temperature_max'),
-    ...(mode === 'rde' ? {} : { setup: listValues(params, 'setup').join(',') || undefined }),
+    ...(category.mode === 'rde' ? {} : { setup: listValues(params, 'setup').join(',') || undefined }),
     ...category.filter,
     sort_by: sortBy,
     sort_dir: sortDir,
@@ -93,7 +94,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
 
   const exportCsv = () => {
     if (!all.data) return
-    downloadCasesCsv(all.data.items, `${mode === 'all' ? 'cases' : mode.replace('-', '_')}_${new Date().toISOString().slice(0, 10)}.csv`)
+    downloadCasesCsv(all.data.items, `${category.mode === 'all' ? 'cases' : category.mode.replace('-', '_')}_${new Date().toISOString().slice(0, 10)}.csv`)
   }
 
   const activeCount = countActiveFilters(params)
@@ -105,7 +106,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
       <PageHeader
         title={category.label}
         description={category.description}
-        tabs={<CategoryTabs active={mode} counts={counts.data} />}
+        tabs={<CategoryTabs active={category.mode} counts={counts.data} />}
       />
 
       <div className="container-x py-5 md:py-6 grid gap-6 md:grid-cols-[264px_minmax(0,1fr)]">
@@ -122,7 +123,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
             <Icon name="chevronDown" size={14} className={filtersOpen ? 'rotate-180' : ''} />
           </button>
           <div id="facet-rail" className={`${filtersOpen ? 'block mt-3 panel p-4' : 'hidden'} md:block md:mt-0 md:p-0 md:border-0 md:bg-transparent`}>
-            <FacetRail hideSetup={mode === 'rde'} focusSearch={focusSearch} />
+            <FacetRail hideSetup={category.mode === 'rde'} focusSearch={focusSearch} />
           </div>
         </aside>
 
@@ -161,14 +162,20 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
           {isError && <ErrorMessage message="The case list could not be loaded." onRetry={refetch} />}
           {data && data.items.length === 0 && (
             <EmptyState
-              title="No cases match these filters"
+              title={activeCount > 0 ? 'No cases match these filters' : `No ${category.label} cases yet`}
               action={activeCount > 0 ? (
                 <button type="button" onClick={() => setParams(clearFilters(params), { replace: true })} className="btn btn-primary">
                   Clear all filters
                 </button>
+              ) : category.placeholder ? (
+                <Link to="/contribute" className="btn btn-primary hover:no-underline">Contribute data</Link>
               ) : undefined}
             >
-              {activeCount > 0 ? 'Try removing a filter or widening a range.' : 'This category has no cases yet.'}
+              {activeCount > 0
+                ? 'Try removing a filter or widening a range.'
+                : category.placeholder
+                  ? 'This category is ready for contributed data. Rows with the setup "rde" in the template land here.'
+                  : 'This category has no cases yet.'}
             </EmptyState>
           )}
           {data && data.items.length > 0 && (
