@@ -52,8 +52,10 @@ export class FoilDrawing {
   private previousX = Infinity
   private simulationTime = 0
   private seed = 11
+  /** Counts the passes, so each one gets its own draw of positions and speeds. */
+  private pass = 0
 
-  /** Deterministic jitter: the lattice is not perfectly regular but the same on every visit. */
+  /** Deterministic jitter: the lattice is not perfectly regular, and each pass differs a little. */
   private random(): number {
     this.seed = (this.seed * 16807) % 2147483647
     return (this.seed - 1) / 2147483646
@@ -94,14 +96,15 @@ export class FoilDrawing {
     const H = this.geometry.H
     const width = Math.max(60, H * this.cellFrac)
     const count = Math.max(2, Math.round(H / width))
-    this.seed = 11
+    this.seed = 11 + 1013 * this.pass++
     this.points = []
     for (let i = 0; i < count; i++) {
       const y = H * (i + 0.5) / count + (this.random() - 0.5) * 0.3 * width
       const y2 = y + H / (2 * count) + (this.random() - 0.5) * 0.3 * width
       for (const [position, dir, family] of [[y, 1, 0], [y2, -1, 1]] as const) {
         const clamped = Math.max(1, Math.min(H - 1, position))
-        this.points.push({ y: clamped, py: clamped, dir, family, energy: 0.4 + 0.6 * this.random(), k: 0.9 + 0.2 * this.random() })
+        // k scales the transverse speed: a different set every pass, within about ±15 %.
+        this.points.push({ y: clamped, py: clamped, dir, family, energy: 0.4 + 0.6 * this.random(), k: 0.85 + 0.3 * this.random() })
       }
     }
   }
