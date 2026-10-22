@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCategoryCounts, useFilterOptions, useLibraryStats } from '../data/hooks'
-import SootFoil from '../components/SootFoil'
+import HeroBanner from '../components/banner/HeroBanner'
 import Icon from '../components/Icon'
 import { CATEGORIES } from '../lib/categories'
 import { fmtCount, GALCIT_DB_URL, GALCIT_REPORT_DOI } from '../lib/format'
@@ -43,9 +43,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-line bg-surface">
-        <SootFoil className="absolute inset-0 w-full h-full" cell={46} opacity={0.9} />
-        <div className="container-x relative py-14 md:py-20">
+      <HeroBanner>
           <h1 className="text-[34px] md:text-[46px] font-semibold leading-[1.08] max-w-[16ch]">
             Gaseous detonation data, searchable.
           </h1>
@@ -78,8 +76,7 @@ export default function Home() {
               </span>
             ))}
           </p>
-        </div>
-      </section>
+      </HeroBanner>
 
       {/* Numbers */}
       <section className="border-b border-line bg-surface">

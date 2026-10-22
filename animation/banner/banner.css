@@ -1,0 +1,73 @@
+
+  :root { --page: #0b0d12; --page-ink: #e6e8ee; --page-ink-2: #9aa3b5; --page-line: #262b36; --sel: #7fbff0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page); color: var(--page-ink); font-family: "IBM Plex Sans", system-ui, sans-serif; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 28px 20px 80px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; }
+  .lede { color: var(--page-ink-2); font-size: 14px; margin: 0 0 18px; max-width: 76ch; line-height: 1.5; }
+  .bar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; font-size: 13px; color: var(--page-ink-2); }
+  .seg { display: inline-flex; border: 1px solid var(--page-line); border-radius: 6px; overflow: hidden; }
+  .seg button { background: transparent; color: var(--page-ink-2); border: 0; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .seg button.on { background: #1b2130; color: var(--page-ink); }
+  .bar label { display: inline-flex; align-items: center; gap: 8px; }
+  .bar input[type=range] { width: 120px; }
+  .bar .ro { font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  .frame { border: 1px solid var(--page-line); border-radius: 10px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  .what { font-size: 13.5px; color: var(--page-ink-2); line-height: 1.55; max-width: 80ch; margin: 18px 0 0; }
+  .what b { color: var(--page-ink); font-weight: 500; }
+  .what li { margin: 4px 0; }
+
+  /* ---------- The site, reproduced ---------- */
+  .site { font-family: "IBM Plex Sans", system-ui, sans-serif; background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.5; }
+  .site[data-theme="light"] { --bg:#f6f7f9; --surface:#fff; --ink:#13203a; --ink-2:#51607a; --ink-3:#8a96ab; --line:#dfe4ec; --line-2:#c4cedb; --accent:#0064a4; --accent-ink:#1b3d6e; --on-accent:#fff; --mark:#ffd200; --band-bg:#ffffff; --band-ink:#13203a; color-scheme: light; }
+  .site[data-theme="dark"] { --bg:#0e1522; --surface:#141d2e; --ink:#e8edf5; --ink-2:#aab6ca; --ink-3:#7a889f; --line:#26324a; --line-2:#38465f; --accent:#7fbff0; --accent-ink:#b3d8f7; --on-accent:#0b1424; --mark:#f4cf35; --band-bg:#141d2e; --band-ink:#dce6f5; color-scheme: dark; }
+  .hdr { height: 56px; display: flex; align-items: center; gap: 18px; padding: 0 28px; background: var(--surface); border-bottom: 1px solid var(--line); position: relative; z-index: 2; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .gsearch { flex: 0 1 420px; height: 34px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--bg); color: var(--ink-3); font-size: 13px; display: flex; align-items: center; gap: 8px; padding: 0 10px; }
+  .nav { margin-left: auto; display: flex; gap: 18px; font-size: 13.5px; color: var(--ink-2); }
+  .nav span:first-child { color: var(--ink); }
+  .hero { position: relative; overflow: hidden; background: var(--band-bg); border-bottom: 1px solid var(--line); }
+  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hero .clipbox { position: absolute; top: 0; bottom: 0; right: 0; width: 50%; height: 100%; }
+  .hero .clipbox video { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .25s linear; }
+  .hero .clipbox { -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 100%), linear-gradient(180deg, transparent 0%, #000 5%, #000 95%, transparent 100%); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 100%), linear-gradient(180deg, transparent 0%, #000 5%, #000 95%, transparent 100%); mask-composite: intersect; }
+  .hero .inner { position: relative; width: 50%; padding: 58px 28px 62px; }
+  .hero h1 { font-size: 42px; font-weight: 600; line-height: 1.08; margin: 0; max-width: 16ch; letter-spacing: -0.01em; color: var(--ink); }
+  .hero p.sub { margin: 18px 0 0; font-size: 16px; max-width: 52ch; line-height: 1.55; color: var(--ink-2); }
+  .search { margin-top: 26px; display: flex; gap: 8px; max-width: 540px; }
+  .search .in { flex: 1; min-width: 0; height: 44px; border-radius: 6px; display: flex; align-items: center; padding: 0 14px; gap: 10px; font-size: 15px; background: var(--surface); border: 1px solid var(--line-2); color: var(--ink-3); }
+  .search .btn { flex-shrink: 0; height: 44px; padding: 0 18px; border-radius: 6px; font-weight: 500; display: flex; align-items: center; font-size: 15px; background: var(--accent); color: var(--on-accent); }
+  .try { margin: 12px 0 0; font-size: 13px; color: var(--ink-2); }
+  .try u { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+  .cap { position: absolute; right: 28px; bottom: 14px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-3); }
+  .strip { display: flex; background: var(--surface); }
+  .strip > div { padding: 18px 28px 18px 0; margin-left: 28px; border-right: 1px solid var(--line); }
+  .strip > div + div { margin-left: 0; padding-left: 28px; }
+  .strip > div:last-child { border-right: 0; }
+  .strip .v { font-family: "IBM Plex Mono", monospace; font-size: 28px; line-height: 1; }
+  .strip .l { margin-top: 6px; font-size: 13px; color: var(--ink-2); }
+
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--sel); outline-offset: 3px; }
+  .action { border: 1px solid var(--page-line); border-radius: 6px; padding: 6px 12px; background: transparent; color: var(--page-ink); cursor: pointer; font: inherit; }
+  .hero .clipbox video { opacity: 0; }
+  .hero .clipbox img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero .clipbox img[hidden] { display: none; }
+  .hero .inner { pointer-events: none; }
+  .cap { background: var(--band-bg); padding: 2px 6px; border-radius: 3px; }
+  #status { min-width: 180px; }
+  .note { font-size: 13px; line-height: 1.6; color: var(--page-ink-2); margin-top: 18px; }
+  @media (max-width: 760px) {
+    .wrap { padding: 20px 12px 40px; }
+    .hdr { padding: 0 18px; }
+    .gsearch { display: none; }
+    .nav { gap: 12px; }
+    .hero .inner { width: 100%; padding: 44px 22px 70px; background: linear-gradient(90deg, var(--band-bg) 25%, transparent 100%); }
+    .hero h1 { font-size: 34px; }
+    .hero p.sub { font-size: 15px; }
+    .cap { right: 16px; left: 16px; bottom: 12px; font-size: 9px; }
+    .strip { display: grid; grid-template-columns: 1fr 1fr; }
+    .strip > div, .strip > div + div { padding: 16px 20px; margin: 0; border: 0; }
+    .search .in { min-width: 0; font-size: 12px; }
+    .nav span:nth-child(n+3) { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero .clipbox video { transition: none; } }

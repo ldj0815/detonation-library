@@ -13,3 +13,6 @@ site/public/cases.json
 site/public/cases.csv
 
 .DS_Store
+
+# Brainstorming mockups (superpowers visual companion)
+.superpowers/

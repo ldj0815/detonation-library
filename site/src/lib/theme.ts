@@ -24,8 +24,12 @@ export function setTheme(t: Theme) {
   applyTheme(t)
 }
 
-/** The theme actually in effect right now. */
+/** The theme actually in effect right now: the attribute on <html> (which a
+ *  ?theme= query sets without touching storage), else the stored choice, else
+ *  the system setting. */
 export function resolvedTheme(): 'light' | 'dark' {
+  const applied = document.documentElement.getAttribute('data-theme')
+  if (applied === 'light' || applied === 'dark') return applied
   const t = getTheme()
   if (t !== 'system') return t
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'

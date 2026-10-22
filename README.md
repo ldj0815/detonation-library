@@ -19,6 +19,16 @@ nothing else, and `HIDDEN_MEASUREMENTS` in [`site/src/config.ts`](site/src/confi
 which hides the matching tabs, columns, plot axes and export columns. Empty
 both lists to publish everything.
 
+## The landing-page banner
+
+The banner plays a schlieren film of a detonation in 2H2 + O2 + 17Ar at 13 kPa,
+taken at 500,000 frames per second with a Shimadzu HPV-X3, and continues its
+front across the page with drawn transverse waves that leave fading tracks, as
+triple points do on a soot foil. The original recording is in [`animation/`](animation/);
+the processed clips in `site/public/banner/` are decorative, not measurement
+data. The standalone study the site's banner was built from, with the script
+that renders the clips, is in [`animation/banner/`](animation/banner/README.md).
+
 ## Data source
 
 The cases in this library were transcribed from the GALCIT Detonation Database:

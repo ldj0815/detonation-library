@@ -25,6 +25,8 @@ const PATHS: Record<string, string> = {
   columns: 'M4 5h16v14H4zm5 0v14m6-14v14',
   sort: 'M8 4v16m0 0-3-3m3 3 3-3M16 20V4m0 0 3 3m-3-3-3 3',
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 9a7 7 0 0 1 14 0',
+  play: 'M8 5v14l11-7z',
+  pause: 'M9 5v14M15 5v14',
 }
 
 interface IconProps extends SVGProps<SVGSVGElement> {

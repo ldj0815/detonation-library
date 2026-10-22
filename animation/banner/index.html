@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banner study · transverse waves</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="banner.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Banner study · transverse waves</h1>
+  <p class="lede">Animation and footage share the header equally. Yellow traces linger for two seconds behind the transverse waves, with colours matched to the selected theme.</p>
+  <div class="bar">
+    <div class="seg" id="themeseg"><button data-t="dark" class="on">Dark</button><button data-t="light">Light</button></div>
+    <div class="seg" id="treatmentseg" aria-label="Video treatment"><button data-treatment="matched" class="on" aria-pressed="true">Theme matched</button><button data-treatment="grey" aria-pressed="false">Grey background</button></div>
+    <span>Trace lifetime: 2 seconds</span>
+    <label>cell width <input type="range" id="cell" min="0.18" max="0.5" step="0.02" value="0.3"> <span class="ro" id="cellv">0.30 × height</span></label>
+    <button class="action" id="pause">Pause</button><button class="action" id="replay">Replay</button>
+    <span class="ro" id="status" role="status"></span>
+  </div>
+
+  <div class="frame"><div class="site" data-theme="dark" id="site">
+    <div class="hdr"><div class="brand"><svg width="26" height="26" viewBox="0 0 26 26"><rect width="26" height="26" rx="6" fill="var(--accent-ink)"/><path d="M4 13 L13 5 L22 13 L13 21 Z" fill="none" stroke="var(--mark)" stroke-width="1.6"/><path d="M8.5 13 L13 9 L17.5 13 L13 17 Z" fill="var(--mark)" fill-opacity=".9"/></svg>Detonation Library</div><div class="gsearch">&#x1F50D;&#xFE0E; Search cases: fuel, oxidizer, reference…</div><div class="nav"><span>Browse</span><span>Plot</span><span>Contribute</span><span>About</span></div></div>
+    <div class="hero" id="band">
+      <canvas id="foil" aria-hidden="true"></canvas>
+      <div class="clipbox"><img id="still" alt="Schlieren image of the detonation wave" hidden><video id="clip" muted playsinline preload="auto" aria-hidden="true"></video></div>
+      <div class="inner">
+        <h1>Gaseous detonation data, searchable.</h1>
+        <p class="sub">Detonation cell widths and lengths measured on soot foils, transcribed from the GALCIT Detonation Database and searchable by mixture, initial conditions and reference. Every value carries its original citation.</p>
+        <div class="search"><div class="in">&#x1F50D;&#xFE0E; Fuel, oxidizer, diluent or author</div><div class="btn">Search</div></div>
+        <p class="try">Try <u>H2 / O2</u>, <u>C2H4 cell width</u>, <u>N2O as oxidizer</u>, <u>Bull (1982)</u>, <u>below 20 kPa</u></p>
+      </div>
+      <div class="cap">2H2 + O2 + 17Ar, 13 kPa · schlieren · 500 000 fps · HPV-X3</div>
+    </div>
+    <div class="strip"><div><div class="v">1,658</div><div class="l">cell size cases</div></div><div><div class="v">194</div><div class="l">with cell length</div></div><div><div class="v">28</div><div class="l">fuels</div></div><div><div class="v">52</div><div class="l">publications</div></div></div>
+  </div></div>
+
+<p class="note">50 / 50 layout · yellow traces fully fade in 2 seconds · transverse waves curve toward their direction of travel.<br>Theme-matched footage, a narrow 8% blend, and steady playback.</p>
+</div>
+
+<script type="module" src="banner.js"></script>
+</body>
+</html>
