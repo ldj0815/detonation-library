@@ -72,6 +72,12 @@ export class FoilDrawing {
     this.reset()
   }
 
+  /** Clip seconds at which the front passes the left edge of the clip's box. */
+  clipExitTime(): number {
+    const g = this.geometry
+    return ((g.videoLeft - g.videoOrigin) / g.scale - CLIP.x0) / (CLIP.v * CLIP.fps)
+  }
+
   /** Clip seconds at which the waves have left the band. */
   leaveTime(): number {
     const g = this.geometry

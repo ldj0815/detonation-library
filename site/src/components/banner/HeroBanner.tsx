@@ -5,6 +5,9 @@ import { CLIP, FoilDrawing, TRACE_LIFETIME } from './drawing'
 import { resolvedTheme } from '../../lib/theme'
 
 const CAPTION = '2H₂ + O₂ + 17Ar, 13 kPa · schlieren · 500 000 fps · HPV-X3'
+/** Seconds the footage stays after its front has left it, and how long it takes to fade. */
+const CLIP_LINGER = 0.4
+const CLIP_FADE = 1.5
 
 interface Props {
   children: ReactNode
@@ -43,7 +46,7 @@ export default function HeroBanner({ children }: Props) {
     let resumeAfterVisibility = false
 
     const player = new BannerPlayback(video, {
-      onReset: () => drawing.reset(),
+      onReset: () => { drawing.reset(); video.style.transitionDuration = '' },
       onChange: () => syncControl(),
     })
 
@@ -79,7 +82,15 @@ export default function HeroBanner({ children }: Props) {
       lastFrame = now
       if (!document.hidden && !reducedMotion) {
         player.advance(seconds, Math.max(CLIP.duration, drawing.leaveTime() + TRACE_LIFETIME))
-        if (player.phase === 'playing' || player.phase === 'tail') drawing.advance(player.time)
+        if (player.phase === 'playing' || player.phase === 'tail') {
+          drawing.advance(player.time)
+          // Once the front has left the footage, let the footage go: the drawn
+          // waves carry the motion from here.
+          if (player.time > drawing.clipExitTime() + CLIP_LINGER && video!.style.opacity !== '0') {
+            video!.style.transitionDuration = `${CLIP_FADE}s`
+            video!.style.opacity = '0'
+          }
+        }
         drawing.draw(ctx!)
       }
       raf = requestAnimationFrame(tick)

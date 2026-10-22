@@ -16,6 +16,9 @@ test('the clip box is treated like object-fit: cover', () => {
   expect(g.videoLeft).toBe(600)
   // The clip is wider than its box at this scale, so its own x = 0 lies left of the box.
   expect(g.videoOrigin).toBeLessThan(600)
+  // The front enters the footage 0.8 s in and crosses it in about seven seconds.
+  expect(d.clipExitTime()).toBeGreaterThan(7)
+  expect(d.clipExitTime()).toBeLessThan(7.5)
   expect(d.leaveTime()).toBeGreaterThan(CLIP.duration)
 })
 
