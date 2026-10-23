@@ -7,13 +7,13 @@ for the production React banner in `site/src/components/banner/`.
 
 The production banner uses the uncompressed `test04_2MHz_2H2-O2-12Ar_15kPa.avi`.
 The raw version keeps more highlight detail and gives a cleaner processed
-background than the supplied contrast exports. Frames 86–210 use a wider
-280 × 200 view at (190, -22), placing the collision at approximately (140, 99),
-near the center. A 22-pixel background margin above the source preserves the
-centering while showing the waves about 20% smaller. The result plays at 15 fps
-for 8.33 seconds; capture was at 2 MHz.
+background than the supplied contrast exports. Frames 86–248 use the middle
+horizontal third of the original 628 × 480 recording: a 628 × 160 strip at
+(0, 160), centered on the original y = 240 line, without padding. The result
+plays at 15 fps for 10.87 seconds; capture was at 2 MHz. The banner displays a
+centered window into this strip using `object-fit: cover`.
 
-`render_test04.py` produces the `test04-wide` light and dark MP4s and collision posters in
+`render_test04.py` produces the `test04-center` light and dark MP4s and still images in
 `site/public/banner/`. It subtracts a pre-wave background, denoises the footage,
 and maps it to the site's theme colors. To regenerate, use Python with numpy,
 Pillow and scipy, and pass `--ffmpeg /path/to/ffmpeg` if needed. The original
@@ -23,9 +23,10 @@ source files stay local and are not included in the website deployment.
 trajectory anchors in `site/src/components/banner/clip.ts` align the animation's
 front position with the footage. The left drawing uses an idealized, single row
 of diamond cells: two mirrored transverse waves with equal speeds and no random
-variation. One complete cell spans the full banner width and 90% of its height.
-Yellow traces still disappear after two seconds, so only the recent part of
-this larger cell remains visible at any moment.
+variation. The illustrative cell is 512 × 366 source pixels, scaled with the
+video rather than fitted to the banner. Both its width and height may extend
+outside the banner; the banner clips them naturally. Yellow traces disappear
+after two seconds, so only the recent part remains visible at any moment.
 These are decorative visual calibrations, not measurement data. The production
 banner preserves the half-and-half layout and existing pause behavior.
 

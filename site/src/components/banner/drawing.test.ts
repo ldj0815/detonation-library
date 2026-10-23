@@ -17,20 +17,22 @@ test('the clip box is treated like object-fit: cover', () => {
   expect(g.videoLeft).toBe(600)
   // The clip is wider than its box at this scale, so its own x = 0 lies left of the box.
   expect(g.videoOrigin).toBeLessThan(600)
-  expect(d.clipExitTime()).toBeGreaterThan(CLIP.collisionTime)
+  expect(d.clipExitTime()).toBeGreaterThan(0)
   expect(d.clipExitTime()).toBeLessThan(CLIP.duration)
   expect(clipMotion(d.clipExitTime()).x * g.scale + g.videoOrigin).toBeCloseTo(g.videoLeft)
   expect(d.leaveTime()).toBeGreaterThan(CLIP.duration)
 })
 
-test('one symmetric diamond spans the full banner width and stays inside its height', () => {
+test('the symmetric cell keeps the video scale and can extend beyond the banner', () => {
   const d = new FoilDrawing()
   d.layout(band, clip, 1)
   const g = d.geometry, size = d.cellSize()
-  const centerY = g.videoOriginY + CLIP.collision.y * g.scale
-  expect(size).toBe(band.width)
+  const centerY = g.videoOriginY + CLIP.center.y * g.scale
+  expect(size).toBeGreaterThan(band.width)
+  expect(d.cellHeight()).toBeGreaterThan(band.height)
+  let extendsOutside = false
   for (let quarter = 0; quarter <= 12; quarter++) {
-    const x = CLIP.collision.x - quarter * size / (4 * g.scale)
+    const x = CLIP.cell.anchorX - quarter * size / (4 * g.scale)
     d.advance(timeAtFront(x))
     const [a, b] = points(d)
     expect(points(d)).toHaveLength(2)
@@ -39,13 +41,12 @@ test('one symmetric diamond spans the full banner width and stays inside its hei
     const height = d.cellHeight()
     const offset = [0, height / 4, height / 2, height / 4][quarter % 4]
     expect(Math.abs(a.y - centerY)).toBeCloseTo(offset)
-    for (const point of [a, b]) {
-      expect(point.y).toBeGreaterThan(0)
-      expect(point.y).toBeLessThan(band.height)
-    }
+    extendsOutside ||= [a, b].some(point => point.y < 0 || point.y > band.height)
   }
+  expect(extendsOutside).toBe(true)
+  // A wider banner at the same media scale does not stretch the cell.
   d.layout({ ...band, width: 1600 }, { ...clip, left: 800, width: 800 }, 1)
-  expect(d.cellSize()).toBe(1600)
+  expect(d.cellSize()).toBeCloseTo(size)
 })
 
 test('regular wave positions repeat exactly across loops and delayed frames', () => {
@@ -57,21 +58,6 @@ test('regular wave positions repeat exactly across loops and delayed frames', ()
   d.reset()
   d.advance(12)
   expect(points(d)).toEqual(first)
-})
-
-test('test04 collision is centered and its two branches converge then separate', () => {
-  const at = clipMotion(CLIP.collisionTime)
-  const before = clipMotion(CLIP.collisionTime - 0.5)
-  const after = clipMotion(CLIP.collisionTime + 0.5)
-  expect(at.upper).toBe(at.lower)
-  expect(at.x).toBe(CLIP.collision.x)
-  expect(at.upper).toBe(CLIP.collision.y)
-  expect(Math.abs(at.x / CLIP.w - 0.5)).toBeLessThan(0.02)
-  expect(Math.abs(at.upper / CLIP.h - 0.5)).toBeLessThan(0.02)
-  expect(before.upper).toBeLessThan(at.upper)
-  expect(before.lower).toBeGreaterThan(at.lower)
-  expect(after.upper).toBeLessThan(at.upper)
-  expect(after.lower).toBeGreaterThan(at.lower)
 })
 
 test('front inversion stays continuous through the collision and beyond the footage', () => {
@@ -86,7 +72,7 @@ test('front inversion stays continuous through the collision and beyond the foot
 
 test('the handoff uses the visible video crop, including vertical crop on wide screens', () => {
   const d = new FoilDrawing()
-  d.layout({ left: 0, top: 100, width: 1800, height: 400 }, { left: 900, top: 100, width: 900, height: 400 }, 3)
+  d.layout({ left: 0, top: 100, width: 3600, height: 400 }, { left: 1800, top: 100, width: 1800, height: 400 }, 3)
   const g = d.geometry
   expect(g.videoOriginY).toBeLessThan(0)
   expect(g.dpr).toBe(2)

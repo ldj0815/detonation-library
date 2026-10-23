@@ -52,14 +52,14 @@ export class FoilDrawing {
   private previousX = Infinity
   private simulationTime = 0
 
-  /** One complete diamond spans the full banner width. */
+  /** Keep the recording's cell scale, even when a cell extends past the banner. */
   cellSize(): number {
-    return this.geometry.W
+    return CLIP.cell.width * this.geometry.scale
   }
 
-  /** Keep the single row inside the banner with a small vertical margin. */
+  /** The central strip is a window into a larger cell, not a size constraint. */
   cellHeight(): number {
-    return this.geometry.H * 0.9
+    return CLIP.cell.height * this.geometry.scale
   }
 
   /** Band and clip boxes in page pixels; the clip sits in its box like object-fit: cover. */
@@ -103,7 +103,7 @@ export class FoilDrawing {
 
   private seedPoints() {
     const g = this.geometry
-    const y = g.videoOriginY + CLIP.collision.y * g.scale
+    const y = g.videoOriginY + CLIP.center.y * g.scale
     this.points = [
       { y, py: y, dir: 1, family: 0, energy: 1 },
       { y, py: y, dir: -1, family: 1, energy: 1 },
@@ -112,8 +112,8 @@ export class FoilDrawing {
 
   private stepPoints(x: number, time: number) {
     const g = this.geometry, size = this.cellSize()
-    const centerY = g.videoOriginY + CLIP.collision.y * g.scale
-    const collisionX = g.videoOrigin + CLIP.collision.x * g.scale
+    const centerY = g.videoOriginY + CLIP.center.y * g.scale
+    const collisionX = g.videoOrigin + CLIP.cell.anchorX * g.scale
     const distance = collisionX - x
     // Mirrored triangle waves: equal slopes, simultaneous reflections,
     // and a center collision every cell. Motion is identical on every pass.

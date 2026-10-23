@@ -143,7 +143,7 @@ export default function HeroBanner({ children }: Props) {
     <section ref={bandRef} className="banner">
       <canvas ref={canvasRef} className="banner-canvas" aria-hidden="true" />
       <div ref={clipRef} className="banner-clip">
-        <img ref={stillRef} alt="Schlieren image of the centered transverse-wave collision in test04" hidden />
+        <img ref={stillRef} alt="Schlieren image from the middle horizontal strip of the test04 recording" hidden />
         <video ref={videoRef} muted playsInline preload="auto" aria-hidden="true" />
       </div>
       <div className="container-x relative">
