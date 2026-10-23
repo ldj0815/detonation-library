@@ -23,12 +23,12 @@ test('the clip box is treated like object-fit: cover', () => {
   expect(d.leaveTime()).toBeGreaterThan(CLIP.duration)
 })
 
-test('one symmetric pair traces equal-sided diamonds that fit within the trace lifetime', () => {
+test('one symmetric diamond spans the full banner width and stays inside its height', () => {
   const d = new FoilDrawing()
   d.layout(band, clip, 1)
   const g = d.geometry, size = d.cellSize()
   const centerY = g.videoOriginY + CLIP.collision.y * g.scale
-  expect(size / g.speed).toBeLessThan(TRACE_LIFETIME)
+  expect(size).toBe(band.width)
   for (let quarter = 0; quarter <= 12; quarter++) {
     const x = CLIP.collision.x - quarter * size / (4 * g.scale)
     d.advance(timeAtFront(x))
@@ -36,9 +36,16 @@ test('one symmetric pair traces equal-sided diamonds that fit within the trace l
     expect(points(d)).toHaveLength(2)
     expect((a.y + b.y) / 2).toBeCloseTo(centerY)
     expect(a.dir).toBe(-b.dir)
-    const offset = [0, size / 4, size / 2, size / 4][quarter % 4]
+    const height = d.cellHeight()
+    const offset = [0, height / 4, height / 2, height / 4][quarter % 4]
     expect(Math.abs(a.y - centerY)).toBeCloseTo(offset)
+    for (const point of [a, b]) {
+      expect(point.y).toBeGreaterThan(0)
+      expect(point.y).toBeLessThan(band.height)
+    }
   }
+  d.layout({ ...band, width: 1600 }, { ...clip, left: 800, width: 800 }, 1)
+  expect(d.cellSize()).toBe(1600)
 })
 
 test('regular wave positions repeat exactly across loops and delayed frames', () => {

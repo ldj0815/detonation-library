@@ -52,9 +52,14 @@ export class FoilDrawing {
   private previousX = Infinity
   private simulationTime = 0
 
-  /** Square diamonds fit inside the two-second trace window, one cell high. */
+  /** One complete diamond spans the full banner width. */
   cellSize(): number {
-    return Math.min(this.geometry.H * 0.65, this.geometry.speed * 1.4)
+    return this.geometry.W
+  }
+
+  /** Keep the single row inside the banner with a small vertical margin. */
+  cellHeight(): number {
+    return this.geometry.H * 0.9
   }
 
   /** Band and clip boxes in page pixels; the clip sits in its box like object-fit: cover. */
@@ -110,10 +115,10 @@ export class FoilDrawing {
     const centerY = g.videoOriginY + CLIP.collision.y * g.scale
     const collisionX = g.videoOrigin + CLIP.collision.x * g.scale
     const distance = collisionX - x
-    // Mirrored triangle waves: equal 45-degree slopes, simultaneous reflections,
+    // Mirrored triangle waves: equal slopes, simultaneous reflections,
     // and a center collision every cell. Motion is identical on every pass.
     const phase = ((distance + size / 2) % (2 * size) + 2 * size) % (2 * size)
-    const offset = phase <= size ? phase - size / 2 : 1.5 * size - phase
+    const offset = (phase <= size ? phase - size / 2 : 1.5 * size - phase) * this.cellHeight() / size
     const direction = phase < size ? 1 : -1
     const sinceTurn = ((distance % (size / 2)) + size / 2) % (size / 2)
     const energy = 0.35 + 0.65 * Math.exp(-sinceTurn / (0.22 * size))
@@ -179,11 +184,12 @@ export class FoilDrawing {
     // Only transverse waves: there is deliberately no continuous front line.
     const frontX = this.frontX
     if (frontX < W + 2 && frontX > -MARGIN) {
-      const width = this.cellSize()
+      const cellWidth = this.cellSize(), cellHeight = this.cellHeight()
+      const diagonal = Math.hypot(cellWidth, cellHeight)
       for (const p of this.points) {
-        const length = (0.45 + 0.5 * p.energy) * width
-        const ex = frontX + length / Math.SQRT2
-        const ey = p.y + p.dir * length / Math.SQRT2
+        const length = (0.45 + 0.5 * p.energy) * diagonal * 0.6
+        const ex = frontX + length * cellWidth / diagonal
+        const ey = p.y + p.dir * length * cellHeight / diagonal
         const gradient = ctx.createLinearGradient(frontX, p.y, ex, ey)
         gradient.addColorStop(0, `rgba(${ink},${0.25 + 0.35 * p.energy})`)
         gradient.addColorStop(1, `rgba(${ink},0)`)
@@ -191,9 +197,8 @@ export class FoilDrawing {
         ctx.lineWidth = 1.2
         ctx.beginPath(); ctx.moveTo(frontX, p.y)
         // The bulge follows the wave's direction of travel while both ends stay put.
-        const controlX = frontX + 0.3 * length
-        const chordY = p.y + (ey - p.y) * (controlX - frontX) / (ex - frontX)
-        const controlY = 2 * chordY - (p.y + p.dir * 0.08 * length)
+        const controlX = frontX + 0.4 * (ex - frontX)
+        const controlY = p.y + 0.7 * (ey - p.y)
         ctx.quadraticCurveTo(controlX, controlY, ex, ey); ctx.stroke()
       }
     }

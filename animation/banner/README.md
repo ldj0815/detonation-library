@@ -22,8 +22,10 @@ source files stay local and are not included in the website deployment.
 `test04-processing.json` records the crop and frame selection. The visual
 trajectory anchors in `site/src/components/banner/clip.ts` align the animation's
 front position with the footage. The left drawing uses an idealized, single row
-of square diamond cells: two mirrored transverse waves with equal speeds, no
-random variation, and a full cell within the two-second yellow trace window.
+of diamond cells: two mirrored transverse waves with equal speeds and no random
+variation. One complete cell spans the full banner width and 90% of its height.
+Yellow traces still disappear after two seconds, so only the recent part of
+this larger cell remains visible at any moment.
 These are decorative visual calibrations, not measurement data. The production
 banner preserves the half-and-half layout and existing pause behavior.
 
