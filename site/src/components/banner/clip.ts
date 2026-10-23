@@ -1,14 +1,14 @@
 /** Centered crop of test04: 2H2/O2/12Ar, 15 kPa, captured at 2 MHz.
- * Source frames 86..210, crop (216, 0, 232, 160); see render_test04.py.
+ * Source frames 86..210, crop (190, -22, 280, 200); see render_test04.py.
  * The visual anchors below follow the leading front and the converging pair.
  */
 export const CLIP = {
-  w: 232, h: 160, fps: 15, duration: 125 / 15,
-  asset: 'test04', collisionTime: (150 - 86) / 15,
-  collision: { x: 114, y: 77 },
+  w: 280, h: 200, fps: 15, duration: 125 / 15,
+  asset: 'test04-wide', collisionTime: (150 - 86) / 15,
+  collision: { x: 140, y: 99 },
 } as const
 
-// Frame numbers are in the original AVI; x/y are in the cropped image.
+// Frame numbers are in the original AVI; x/y were traced in the initial crop.
 // Out-of-crop y values keep a wave offscreen until it enters naturally.
 const ANCHORS = [
   { frame: 86, x: 245, upper: -60, lower: 250 },
@@ -36,9 +36,9 @@ export function clipMotion(time: number) {
   const a = ANCHORS[i], b = ANCHORS[i + 1]
   const fraction = (frame - a.frame) / (b.frame - a.frame)
   return {
-    x: a.x + (b.x - a.x) * fraction,
-    upper: a.upper + (b.upper - a.upper) * fraction,
-    lower: a.lower + (b.lower - a.lower) * fraction,
+    x: a.x + (b.x - a.x) * fraction + 26,
+    upper: a.upper + (b.upper - a.upper) * fraction + 22,
+    lower: a.lower + (b.lower - a.lower) * fraction + 22,
     upperDirection: (b.upper >= a.upper ? 1 : -1) as 1 | -1,
     lowerDirection: (b.lower >= a.lower ? 1 : -1) as 1 | -1,
   }
@@ -46,6 +46,7 @@ export function clipMotion(time: number) {
 
 /** Invert the monotonic front path, extrapolating its final speed for the drawing. */
 export function timeAtFront(x: number): number {
+  x -= 26 // Convert from the wider crop back to the traced coordinates.
   let i = ANCHORS.findIndex((_, index) => index < ANCHORS.length - 1 && x >= ANCHORS[index + 1].x)
   if (i < 0) i = ANCHORS.length - 2
   const a = ANCHORS[i], b = ANCHORS[i + 1]

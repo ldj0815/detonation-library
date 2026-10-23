@@ -4,19 +4,21 @@
   "source_frame_start_inclusive": 86,
   "source_frame_end_exclusive": 211,
   "crop": {
-    "x": 216,
-    "y": 0,
-    "width": 232,
-    "height": 160
+    "x": 190,
+    "y": -22,
+    "width": 280,
+    "height": 200
   },
+  "top_padding_pixels": 22,
+  "asset": "test04-wide",
   "frames": 125,
   "playback_fps": 15,
   "duration_seconds": 8.333333333333334,
   "capture_fps_from_filename": 2000000,
   "collision_source_frame": 150,
   "collision_crop_position_approx": {
-    "x": 114,
-    "y": 77
+    "x": 140,
+    "y": 99
   },
   "note": "Visual calibration for banner continuity; not measurement data. See site/src/components/banner/clip.ts for trajectory anchors."
 }

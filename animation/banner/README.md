@@ -7,21 +7,25 @@ for the production React banner in `site/src/components/banner/`.
 
 The production banner uses the uncompressed `test04_2MHz_2H2-O2-12Ar_15kPa.avi`.
 The raw version keeps more highlight detail and gives a cleaner processed
-background than the supplied contrast exports. Frames 86–210 are cropped to
-232 × 160 at (216, 0), placing the collision at approximately (114, 77), near
-the center. The result plays at 15 fps for 8.33 seconds; capture was at 2 MHz.
+background than the supplied contrast exports. Frames 86–210 use a wider
+280 × 200 view at (190, -22), placing the collision at approximately (140, 99),
+near the center. A 22-pixel background margin above the source preserves the
+centering while showing the waves about 20% smaller. The result plays at 15 fps
+for 8.33 seconds; capture was at 2 MHz.
 
-`render_test04.py` produces the light and dark MP4s and collision posters in
+`render_test04.py` produces the `test04-wide` light and dark MP4s and collision posters in
 `site/public/banner/`. It subtracts a pre-wave background, denoises the footage,
 and maps it to the site's theme colors. To regenerate, use Python with numpy,
 Pillow and scipy, and pass `--ffmpeg /path/to/ffmpeg` if needed. The original
 source files stay local and are not included in the website deployment.
 
 `test04-processing.json` records the crop and frame selection. The visual
-trajectory anchors in `site/src/components/banner/clip.ts` align the two drawn
-branches with this collision and their outgoing motion. These are decorative
-visual calibrations, not measurement data. The production banner preserves the
-half-and-half layout, two-second yellow traces and the existing pause behavior.
+trajectory anchors in `site/src/components/banner/clip.ts` align the animation's
+front position with the footage. The left drawing uses an idealized, single row
+of square diamond cells: two mirrored transverse waves with equal speeds, no
+random variation, and a full cell within the two-second yellow trace window.
+These are decorative visual calibrations, not measurement data. The production
+banner preserves the half-and-half layout and existing pause behavior.
 
 ## Original standalone study
 

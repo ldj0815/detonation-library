@@ -1,6 +1,6 @@
 // The drawn half of the banner: transverse waves that continue the clip's front
 // across the band and write fading tracks, as triple points do on a soot foil.
-// The first pair follows the centered test04 collision before continuing freely.
+// One symmetric pair makes a single row of regular diamond cells.
 import { CLIP, clipMotion, timeAtFront } from './clip'
 export { CLIP } from './clip'
 
@@ -11,7 +11,7 @@ export const TRACE_LIFETIME = 2
 /** How far past the band's left edge the last wave travels before the loop restarts. */
 export const MARGIN = 40
 
-interface Point { y: number; py: number; dir: 1 | -1; family: 0 | 1; energy: number; k: number; slope: number }
+interface Point { y: number; py: number; dir: 1 | -1; family: 0 | 1; energy: number }
 interface Segment { x1: number; y1: number; x2: number; y2: number; time: number; energy: number }
 interface Flash { x: number; y: number; time: number }
 
@@ -43,8 +43,6 @@ function rgbOf(hex: string, fallback: string): string {
 
 export class FoilDrawing {
   geometry: Geometry = { W: 0, H: 0, dpr: 1, scale: 1, vw: 0, videoLeft: 0, videoOrigin: 0, videoOriginY: 0, speed: 1 }
-  /** Cell width as a fraction of the band's height. */
-  cellFrac = 0.7
   private ink = '220,230,245'
   private trace = '244,207,53'
   private points: Point[] = []
@@ -53,15 +51,10 @@ export class FoilDrawing {
   private frontX = Infinity
   private previousX = Infinity
   private simulationTime = 0
-  private seed = 11
-  /** Counts the passes, so each one gets its own draw of positions and speeds. */
-  private pass = 0
-  private tracking = true
 
-  /** Deterministic jitter: the lattice is not perfectly regular, and each pass differs a little. */
-  private random(): number {
-    this.seed = (this.seed * 16807) % 2147483647
-    return (this.seed - 1) / 2147483646
+  /** Square diamonds fit inside the two-second trace window, one cell high. */
+  cellSize(): number {
+    return Math.min(this.geometry.H * 0.65, this.geometry.speed * 1.4)
   }
 
   /** Band and clip boxes in page pixels; the clip sits in its box like object-fit: cover. */
@@ -100,55 +93,41 @@ export class FoilDrawing {
     this.simulationTime = 0
     this.segments = []
     this.flashes = []
-    this.tracking = true
     this.seedPoints()
   }
 
   private seedPoints() {
     const g = this.geometry
-    const initial = clipMotion(0)
-    const handoff = this.clipExitTime()
-    const a = clipMotion(handoff), b = clipMotion(handoff + 0.05)
-    this.seed = 11 + 1013 * this.pass++
-    this.points = []
-    for (const [key, dirKey, family] of [['upper', 'upperDirection', 0], ['lower', 'lowerDirection', 1]] as const) {
-      const y = g.videoOriginY + initial[key] * g.scale
-      const slope = Math.max(0.25, Math.min(1.4, Math.abs((b[key] - a[key]) / (b.x - a.x))))
-      // Only the two branches of this collision; vary speed after the handoff.
-      this.points.push({ y, py: y, dir: initial[dirKey], family, energy: 0.5, k: 0.85 + 0.3 * this.random(), slope })
-    }
+    const y = g.videoOriginY + CLIP.collision.y * g.scale
+    this.points = [
+      { y, py: y, dir: 1, family: 0, energy: 1 },
+      { y, py: y, dir: -1, family: 1, energy: 1 },
+    ]
   }
 
   private stepPoints(x: number, time: number) {
-    const H = this.geometry.H
-    const width = Math.max(60, H * this.cellFrac), length = width * 1.7
-    const dx = this.previousX - x
-    const tracked = time <= this.clipExitTime()
-    const motion = clipMotion(time)
-    if (!tracked && this.tracking) {
-      // A branch outside the camera crop joins from the canvas edge, not its interior.
-      for (const p of this.points) p.y = Math.max(0, Math.min(H, p.y))
-      this.tracking = false
-    }
+    const g = this.geometry, size = this.cellSize()
+    const centerY = g.videoOriginY + CLIP.collision.y * g.scale
+    const collisionX = g.videoOrigin + CLIP.collision.x * g.scale
+    const distance = collisionX - x
+    // Mirrored triangle waves: equal 45-degree slopes, simultaneous reflections,
+    // and a center collision every cell. Motion is identical on every pass.
+    const phase = ((distance + size / 2) % (2 * size) + 2 * size) % (2 * size)
+    const offset = phase <= size ? phase - size / 2 : 1.5 * size - phase
+    const direction = phase < size ? 1 : -1
+    const sinceTurn = ((distance % (size / 2)) + size / 2) % (size / 2)
+    const energy = 0.35 + 0.65 * Math.exp(-sinceTurn / (0.22 * size))
     for (const p of this.points) {
       p.py = p.y
-      if (tracked) {
-        p.y = this.geometry.videoOriginY + (p.family === 0 ? motion.upper : motion.lower) * this.geometry.scale
-        p.dir = p.family === 0 ? motion.upperDirection : motion.lowerDirection
-        p.energy = time < CLIP.collisionTime ? 0.5 : 0.25 + 0.75 * Math.exp(-(time - CLIP.collisionTime) / 1.1)
-      } else {
-        p.y += p.dir * dx * p.slope * p.k * (0.75 + 0.25 * p.energy)
-        p.energy *= Math.exp(-dx / (0.45 * length))
-        if (p.y < 0) { p.y = -p.y; p.dir = 1; p.energy = 1 }
-        if (p.y > H) { p.y = 2 * H - p.y; p.dir = -1; p.energy = 1 }
-      }
+      const sign = p.family === 0 ? 1 : -1
+      p.y = centerY + sign * offset
+      p.dir = (sign * direction) as 1 | -1
+      p.energy = energy
       this.segments.push({ x1: this.previousX, y1: p.py, x2: x, y2: p.y, time, energy: p.energy })
     }
-    for (const a of this.points) if (!tracked && a.family === 0) for (const b of this.points) if (b.family === 1) {
-      if ((a.py - b.py) * (a.y - b.y) < 0 && Math.abs(a.py - b.py) < width) {
-        this.flashes.push({ x, y: (a.y + b.y) / 2, time })
-        a.energy = b.energy = 1
-      }
+    const [a, b] = this.points
+    if ((a.py - b.py) * (a.y - b.y) < 0 || (a.y === b.y && a.py !== b.py)) {
+      this.flashes.push({ x, y: centerY, time })
     }
     this.previousX = x
   }
@@ -157,14 +136,14 @@ export class FoilDrawing {
   advance(time: number) {
     const g = this.geometry
     const x = g.videoOrigin + clipMotion(time).x * g.scale
-    if (!Number.isFinite(this.previousX)) this.previousX = Math.min(g.W + 2, x)
+    if (!Number.isFinite(this.previousX)) this.previousX = Math.min(g.W + 2, g.videoOrigin + clipMotion(0).x * g.scale)
     const distance = this.previousX - x
     if (distance > 0 && x < g.W + 2) {
       // Fixed spatial substeps keep collisions and curves stable at 15 fps or after a delayed frame.
       const fromX = this.previousX, fromTime = this.simulationTime
       const count = Math.max(1, Math.ceil(distance / 1.5))
       for (let i = 1; i <= count; i++) {
-        this.stepPoints(fromX - distance * i / count, fromTime + (time - fromTime) * i / count)
+        this.stepPoints(i === count ? x : fromX - distance * i / count, fromTime + (time - fromTime) * i / count)
       }
     }
     this.frontX = x
@@ -200,12 +179,11 @@ export class FoilDrawing {
     // Only transverse waves: there is deliberately no continuous front line.
     const frontX = this.frontX
     if (frontX < W + 2 && frontX > -MARGIN) {
-      const width = Math.max(60, H * this.cellFrac)
+      const width = this.cellSize()
       for (const p of this.points) {
         const length = (0.45 + 0.5 * p.energy) * width
-        const aspect = 1 / p.slope
-        const ex = frontX + length * aspect / Math.hypot(aspect, 1)
-        const ey = p.y + p.dir * length / Math.hypot(aspect, 1)
+        const ex = frontX + length / Math.SQRT2
+        const ey = p.y + p.dir * length / Math.SQRT2
         const gradient = ctx.createLinearGradient(frontX, p.y, ex, ey)
         gradient.addColorStop(0, `rgba(${ink},${0.25 + 0.35 * p.energy})`)
         gradient.addColorStop(1, `rgba(${ink},0)`)
