@@ -1,7 +1,32 @@
 # Transverse-wave banner study
 
-This continues Claude's v4/v5 header prototype. It is a standalone review page;
-the production React homepage has not been changed or deployed.
+This folder contains the original standalone header study and the media renderer
+for the production React banner in `site/src/components/banner/`.
+
+## Current production footage: test04
+
+The production banner uses the uncompressed `test04_2MHz_2H2-O2-12Ar_15kPa.avi`.
+The raw version keeps more highlight detail and gives a cleaner processed
+background than the supplied contrast exports. Frames 86–210 are cropped to
+232 × 160 at (216, 0), placing the collision at approximately (114, 77), near
+the center. The result plays at 15 fps for 8.33 seconds; capture was at 2 MHz.
+
+`render_test04.py` produces the light and dark MP4s and collision posters in
+`site/public/banner/`. It subtracts a pre-wave background, denoises the footage,
+and maps it to the site's theme colors. To regenerate, use Python with numpy,
+Pillow and scipy, and pass `--ffmpeg /path/to/ffmpeg` if needed. The original
+source files stay local and are not included in the website deployment.
+
+`test04-processing.json` records the crop and frame selection. The visual
+trajectory anchors in `site/src/components/banner/clip.ts` align the two drawn
+branches with this collision and their outgoing motion. These are decorative
+visual calibrations, not measurement data. The production banner preserves the
+half-and-half layout, two-second yellow traces and the existing pause behavior.
+
+## Original standalone study
+
+The review page below retains the earlier footage and grey-background alternative;
+use the React development server in `site/` to review the current production banner.
 
 From the repository root, serve it with:
 

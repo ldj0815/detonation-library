@@ -1,9 +1,9 @@
 // The drawn half of the banner: transverse waves that continue the clip's front
 // across the band and write fading tracks, as triple points do on a soot foil.
-// Ported from animation/banner/banner.js; the numbers are the ones chosen there.
+// The first pair follows the centered test04 collision before continuing freely.
+import { CLIP, clipMotion, timeAtFront } from './clip'
+export { CLIP } from './clip'
 
-/** The clip's front, measured frame by frame: x = x0 + v * fps * t, in crop pixels. */
-export const CLIP = { w: 292, h: 200, fps: 15, x0: 328.5784, v: -2.937155, duration: 12.6 } as const
 /** Part of the clip's width over which the drawing blends into the footage (matches the CSS mask). */
 export const FEATHER = 0.08
 /** Seconds a track stays visible. */
@@ -11,11 +11,11 @@ export const TRACE_LIFETIME = 2
 /** How far past the band's left edge the last wave travels before the loop restarts. */
 export const MARGIN = 40
 
-interface Point { y: number; py: number; dir: 1 | -1; family: 0 | 1; energy: number; k: number }
+interface Point { y: number; py: number; dir: 1 | -1; family: 0 | 1; energy: number; k: number; slope: number }
 interface Segment { x1: number; y1: number; x2: number; y2: number; time: number; energy: number }
 interface Flash { x: number; y: number; time: number }
 
-export interface Box { left: number; width: number; height: number }
+export interface Box { left: number; top?: number; width: number; height: number }
 
 export interface Geometry {
   W: number
@@ -29,6 +29,8 @@ export interface Geometry {
   videoLeft: number
   /** Where the clip's own x = 0 falls, in band pixels (the box crops it). */
   videoOrigin: number
+  /** Where the crop's own y = 0 falls after object-fit: cover. */
+  videoOriginY: number
   /** Page pixels per clip-second. */
   speed: number
 }
@@ -40,9 +42,9 @@ function rgbOf(hex: string, fallback: string): string {
 }
 
 export class FoilDrawing {
-  geometry: Geometry = { W: 0, H: 0, dpr: 1, scale: 1, vw: 0, videoLeft: 0, videoOrigin: 0, speed: 1 }
+  geometry: Geometry = { W: 0, H: 0, dpr: 1, scale: 1, vw: 0, videoLeft: 0, videoOrigin: 0, videoOriginY: 0, speed: 1 }
   /** Cell width as a fraction of the band's height. */
-  cellFrac = 0.3
+  cellFrac = 0.7
   private ink = '220,230,245'
   private trace = '244,207,53'
   private points: Point[] = []
@@ -54,6 +56,7 @@ export class FoilDrawing {
   private seed = 11
   /** Counts the passes, so each one gets its own draw of positions and speeds. */
   private pass = 0
+  private tracking = true
 
   /** Deterministic jitter: the lattice is not perfectly regular, and each pass differs a little. */
   private random(): number {
@@ -68,20 +71,22 @@ export class FoilDrawing {
     const scale = Math.max(clip.height / CLIP.h, vw / CLIP.w)
     const videoLeft = clip.left - band.left
     const videoOrigin = videoLeft - (CLIP.w * scale - vw) / 2
-    this.geometry = { W, H, dpr: Math.min(2, dpr), scale, vw, videoLeft, videoOrigin, speed: Math.abs(CLIP.v) * CLIP.fps * scale }
+    const videoOriginY = (clip.top ?? 0) - (band.top ?? 0) - (CLIP.h * scale - clip.height) / 2
+    const speed = (clipMotion(CLIP.duration).x - clipMotion(CLIP.duration + 1).x) * scale
+    this.geometry = { W, H, dpr: Math.min(2, dpr), scale, vw, videoLeft, videoOrigin, videoOriginY, speed }
     this.reset()
   }
 
   /** Clip seconds at which the front passes the left edge of the clip's box. */
   clipExitTime(): number {
     const g = this.geometry
-    return ((g.videoLeft - g.videoOrigin) / g.scale - CLIP.x0) / (CLIP.v * CLIP.fps)
+    return timeAtFront((g.videoLeft - g.videoOrigin) / g.scale)
   }
 
   /** Clip seconds at which the waves have left the band. */
   leaveTime(): number {
     const g = this.geometry
-    return (g.videoOrigin + CLIP.x0 * g.scale + MARGIN) / g.speed
+    return timeAtFront((-MARGIN - g.videoOrigin) / g.scale)
   }
 
   /** Ink for the waves and colour for the tracks, as hex. */
@@ -95,23 +100,22 @@ export class FoilDrawing {
     this.simulationTime = 0
     this.segments = []
     this.flashes = []
+    this.tracking = true
     this.seedPoints()
   }
 
   private seedPoints() {
-    const H = this.geometry.H
-    const width = Math.max(60, H * this.cellFrac)
-    const count = Math.max(2, Math.round(H / width))
+    const g = this.geometry
+    const initial = clipMotion(0)
+    const handoff = this.clipExitTime()
+    const a = clipMotion(handoff), b = clipMotion(handoff + 0.05)
     this.seed = 11 + 1013 * this.pass++
     this.points = []
-    for (let i = 0; i < count; i++) {
-      const y = H * (i + 0.5) / count + (this.random() - 0.5) * 0.3 * width
-      const y2 = y + H / (2 * count) + (this.random() - 0.5) * 0.3 * width
-      for (const [position, dir, family] of [[y, 1, 0], [y2, -1, 1]] as const) {
-        const clamped = Math.max(1, Math.min(H - 1, position))
-        // k scales the transverse speed: a different set every pass, within about ±15 %.
-        this.points.push({ y: clamped, py: clamped, dir, family, energy: 0.4 + 0.6 * this.random(), k: 0.85 + 0.3 * this.random() })
-      }
+    for (const [key, dirKey, family] of [['upper', 'upperDirection', 0], ['lower', 'lowerDirection', 1]] as const) {
+      const y = g.videoOriginY + initial[key] * g.scale
+      const slope = Math.max(0.25, Math.min(1.4, Math.abs((b[key] - a[key]) / (b.x - a.x))))
+      // Only the two branches of this collision; vary speed after the handoff.
+      this.points.push({ y, py: y, dir: initial[dirKey], family, energy: 0.5, k: 0.85 + 0.3 * this.random(), slope })
     }
   }
 
@@ -119,17 +123,28 @@ export class FoilDrawing {
     const H = this.geometry.H
     const width = Math.max(60, H * this.cellFrac), length = width * 1.7
     const dx = this.previousX - x
+    const tracked = time <= this.clipExitTime()
+    const motion = clipMotion(time)
+    if (!tracked && this.tracking) {
+      // A branch outside the camera crop joins from the canvas edge, not its interior.
+      for (const p of this.points) p.y = Math.max(0, Math.min(H, p.y))
+      this.tracking = false
+    }
     for (const p of this.points) {
       p.py = p.y
-      // The transverse wave is strongest just after a collision and weakens along
-      // the cell, so the track curves: steep at first, flatter later.
-      p.y += p.dir * dx / 1.7 * p.k * (0.55 + 0.6 * p.energy)
-      p.energy *= Math.exp(-dx / (0.45 * length))
-      if (p.y < 0) { p.y = -p.y; p.dir = 1; p.energy = 1 }
-      if (p.y > H) { p.y = 2 * H - p.y; p.dir = -1; p.energy = 1 }
+      if (tracked) {
+        p.y = this.geometry.videoOriginY + (p.family === 0 ? motion.upper : motion.lower) * this.geometry.scale
+        p.dir = p.family === 0 ? motion.upperDirection : motion.lowerDirection
+        p.energy = time < CLIP.collisionTime ? 0.5 : 0.25 + 0.75 * Math.exp(-(time - CLIP.collisionTime) / 1.1)
+      } else {
+        p.y += p.dir * dx * p.slope * p.k * (0.75 + 0.25 * p.energy)
+        p.energy *= Math.exp(-dx / (0.45 * length))
+        if (p.y < 0) { p.y = -p.y; p.dir = 1; p.energy = 1 }
+        if (p.y > H) { p.y = 2 * H - p.y; p.dir = -1; p.energy = 1 }
+      }
       this.segments.push({ x1: this.previousX, y1: p.py, x2: x, y2: p.y, time, energy: p.energy })
     }
-    for (const a of this.points) if (a.family === 0) for (const b of this.points) if (b.family === 1) {
+    for (const a of this.points) if (!tracked && a.family === 0) for (const b of this.points) if (b.family === 1) {
       if ((a.py - b.py) * (a.y - b.y) < 0 && Math.abs(a.py - b.py) < width) {
         this.flashes.push({ x, y: (a.y + b.y) / 2, time })
         a.energy = b.energy = 1
@@ -141,7 +156,7 @@ export class FoilDrawing {
   /** Move the waves to where the clip's front is at clip-second `time`. */
   advance(time: number) {
     const g = this.geometry
-    const x = g.videoOrigin + (CLIP.x0 + CLIP.v * CLIP.fps * time) * g.scale
+    const x = g.videoOrigin + clipMotion(time).x * g.scale
     if (!Number.isFinite(this.previousX)) this.previousX = Math.min(g.W + 2, x)
     const distance = this.previousX - x
     if (distance > 0 && x < g.W + 2) {
@@ -188,8 +203,9 @@ export class FoilDrawing {
       const width = Math.max(60, H * this.cellFrac)
       for (const p of this.points) {
         const length = (0.45 + 0.5 * p.energy) * width
-        const ex = frontX + length * 1.7 / Math.hypot(1.7, 1)
-        const ey = p.y + p.dir * length / Math.hypot(1.7, 1)
+        const aspect = 1 / p.slope
+        const ex = frontX + length * aspect / Math.hypot(aspect, 1)
+        const ey = p.y + p.dir * length / Math.hypot(aspect, 1)
         const gradient = ctx.createLinearGradient(frontX, p.y, ex, ey)
         gradient.addColorStop(0, `rgba(${ink},${0.25 + 0.35 * p.energy})`)
         gradient.addColorStop(1, `rgba(${ink},0)`)

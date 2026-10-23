@@ -273,6 +273,8 @@
     border-radius: 3px;
   }
   @media (max-width: 767px) {
+    /* Text spans both halves here; soften the enlarged collision behind it. */
+    .banner-clip { opacity: 0.25; }
     .banner-inner {
       width: 100%;
       background: linear-gradient(90deg, var(--surface) 30%, transparent 100%);

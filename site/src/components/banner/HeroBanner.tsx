@@ -4,7 +4,7 @@ import { BannerPlayback } from './playback'
 import { CLIP, FoilDrawing, TRACE_LIFETIME } from './drawing'
 import { resolvedTheme } from '../../lib/theme'
 
-const CAPTION = '2H₂ + O₂ + 17Ar, 13 kPa · schlieren · 500 000 fps · HPV-X3'
+const CAPTION = '2H₂ + O₂ + 12Ar, 15 kPa · schlieren · 2 000 000 fps · Shimadzu'
 /** Seconds the footage stays after its front has left it, and how long it takes to fade. */
 const CLIP_LINGER = 0.4
 const CLIP_FADE = 1.5
@@ -69,12 +69,12 @@ export default function HeroBanner({ children }: Props) {
       const theme = resolvedTheme()
       const styles = getComputedStyle(band!)
       drawing.setColours(styles.getPropertyValue('--ink'), styles.getPropertyValue('--mark'))
-      const poster = `${base}banner/poster-${theme}.png`
+      const poster = `${base}banner/${CLIP.asset}-${theme}.png`
       video!.poster = poster
       still!.src = poster
       still!.hidden = !reducedMotion
       if (reducedMotion) player.stop()
-      else void player.start(`${base}banner/clip-${theme}.mp4`)
+      else void player.start(`${base}banner/${CLIP.asset}-${theme}.mp4`)
     }
 
     function tick(now: number) {
@@ -143,7 +143,7 @@ export default function HeroBanner({ children }: Props) {
     <section ref={bandRef} className="banner">
       <canvas ref={canvasRef} className="banner-canvas" aria-hidden="true" />
       <div ref={clipRef} className="banner-clip">
-        <img ref={stillRef} alt="Schlieren image of a detonation wave crossing the test section" hidden />
+        <img ref={stillRef} alt="Schlieren image of the centered transverse-wave collision in test04" hidden />
         <video ref={videoRef} muted playsInline preload="auto" aria-hidden="true" />
       </div>
       <div className="container-x relative">
