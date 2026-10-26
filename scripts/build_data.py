@@ -7,14 +7,15 @@ Writes site/public/cases.json (what the pages read) and site/public/cases.csv
 and writes nothing.
 
 While HIDDEN_FIELDS is not empty, the site is a cell-size library: those
-columns are published empty and a case that carries nothing but hidden values
-is left out of both files. data/cases.csv is never changed by this.
+columns are published empty and a case that carries nothing but hidden values,
+or a detonation case with no measurement at all, is left out of both files.
+data/cases.csv is never changed by this.
 """
 import json
 import sys
 from pathlib import Path
 
-from case_schema import STORED_COLUMNS, StoredCase
+from case_schema import STORED_COLUMNS, SetupType, StoredCase
 from csv_io import format_timestamp, read_cases, write_cases
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -32,10 +33,12 @@ SHOWN_FIELDS = ("cell_width_mm", "cell_length_mm")
 
 
 def is_published(case: StoredCase) -> bool:
-    """A case stays published if it has a shown measurement or no hidden one."""
+    """A case stays published if it has a shown measurement. Without one, only
+    an RDE run with no hidden value stays: a detonation case then has nothing
+    the site shows (for example a critical energy in J/cm, kept in its notes)."""
     has_shown = any(getattr(case, field) is not None for field in SHOWN_FIELDS)
     has_hidden = any(getattr(case, field) is not None for field in HIDDEN_FIELDS)
-    return has_shown or not has_hidden
+    return has_shown or (not has_hidden and case.setup == SetupType.rde)
 
 
 def published_cases(cases: list[StoredCase]) -> list[StoredCase]:

@@ -59,7 +59,7 @@ Everything you submit, including your name and email address, is public.
 | `id` | Permanent case number, used in the site's case links |
 | `title` | Short label for the case |
 | `setup` | `detonation` or `rde` |
-| `geometry` | Test-section geometry, for example `round tube` |
+| `geometry` | Test-section geometry, for example `round tube`. GALCIT cases carry only what the report states: the initiation geometry for critical energies (for example `spherical, high explosive`), `round, confined` for minimum tube diameters, and `not stated` for cell sizes and critical tube diameters |
 | `fuel`, `oxidizer` | Mixture components |
 | `equivalence_ratio` | Equivalence ratio of the mixture |
 | `initial_pressure_kpa`, `initial_temperature_k` | Initial conditions |

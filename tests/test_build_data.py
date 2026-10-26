@@ -36,8 +36,9 @@ def test_build_writes_typed_json_and_a_csv_copy(tmp_path):
 
 
 def test_build_leaves_out_the_hidden_measurements(tmp_path):
-    """While HIDDEN_FIELDS is set, cases that carry only hidden values are left
-    out and the hidden columns are published empty; data/cases.csv is untouched."""
+    """While HIDDEN_FIELDS is set, cases that carry only hidden values, and
+    detonation cases with no measurement at all, are left out; the hidden
+    columns are published empty; data/cases.csv is untouched."""
     data = tmp_path / "cases.csv"
     out = tmp_path / "public"
     write_cases(data, [
@@ -45,6 +46,7 @@ def test_build_leaves_out_the_hidden_measurements(tmp_path):
         stored(2, critical_energy_j=5),
         stored(3, cell_length_mm=30, critical_hydraulic_diameter_mm=20),
         stored(4, setup="rde", sharing_link="https://example.org/run-4"),
+        stored(5, notes="Critical energy 62.7944 J/cm (cylindrical initiation)."),
     ])
     before = data.read_bytes()
 
