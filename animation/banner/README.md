@@ -141,3 +141,22 @@ Seven tests cover cold loading, four consecutive loops, rapid source switching,
 pause during startup, hidden-tab/tail pausing, reduced motion, and blocked autoplay.
 All three MP4 files were decoded successfully. Browser checks covered full-width
 and narrow layouts, both video treatments, theme switching, and steady playback.
+
+## RDE page header
+
+The RDE browse page uses `2026-07-29_test6.1_RDE.m4v` in its own header.
+`render_rde.py` prepares light and dark `rde-test6` MP4s and posters, keeping the
+full frame and the complete 74.9-second clip. The 256 × 184 source is enlarged
+3× before theme mapping, with mild denoising and no synthetic frames. The
+original recording stays unchanged. Regenerate with Python, numpy and Pillow:
+
+```sh
+python animation/banner/render_rde.py --ffmpeg /path/to/ffmpeg
+```
+
+`rde-processing.json` records the source and rendering. The engine and plume
+stay fully visible to the right of the title on desktop and below it on phones.
+The header leaves the text background clear, provides a pause control, pauses
+in hidden tabs, and shows a still image for reduced motion until
+Play is requested. The category tabs, release metadata and data controls remain
+part of the RDE page.

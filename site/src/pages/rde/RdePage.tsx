@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useCategoryCounts } from '../../data/hooks'
 import { clearRdeFilters, countRdeFilters, downloadRdeCsv, filterRde, parseRdeFilters, publicationIndex, sortRde, useRde } from '../../data/rde'
 import type { RdeNumericKey, RdePublication, RdeRelease } from '../../types/rde'
-import PageHeader from '../../components/PageHeader'
+import RdeHeader from '../../components/banner/RdeHeader'
 import CategoryTabs from '../../components/CategoryTabs'
 import Pagination from '../../components/Pagination'
 import Skeleton from '../../components/Skeleton'
@@ -208,8 +208,7 @@ export default function RdePage() {
 
   return (
     <div>
-      <PageHeader
-        title="Rotating detonation engines"
+      <RdeHeader
         description={category.description}
         meta={meta}
         tabs={<CategoryTabs active="rde" counts={counts.data} />}

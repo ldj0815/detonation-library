@@ -1,0 +1,19 @@
+{
+  "source": "animation/2026-07-29_test6.1_RDE.m4v",
+  "asset": "rde-test6",
+  "original_size": {
+    "width": 256,
+    "height": 184
+  },
+  "render_size": {
+    "width": 768,
+    "height": 552
+  },
+  "frames": 749,
+  "playback_fps": 10,
+  "duration_seconds": 74.9,
+  "poster_frame": 75,
+  "framing": "Full frame; the header contains the whole engine and plume without cropping.",
+  "processing": "Mild noise reduction, bicubic 3x enlargement before tone mapping, site light and dark palettes. No frame interpolation or sharpening.",
+  "note": "Decorative header footage. Playback frame rate does not identify the camera capture rate. Original M4V unchanged."
+}
