@@ -20,12 +20,6 @@ site/public/cases.csv
 # Raw RDE database releases: internal, with restricted source information.
 data/RDE/
 
-# The RDE subset exported from release 1.0.0, which is marked internal use
-# only. Committing it publishes it (the repository is public and main deploys
-# the site), so it stays out of git until the release is cleared. Then remove
-# this entry and set RDE_ALLOW_INTERNAL=1 in .github/workflows/deploy.yml.
-data/rde_subset/
-
 # Generated from data/rde_subset/ by scripts/build_data.py
 site/public/rde.json
 site/public/rde.csv

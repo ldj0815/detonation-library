@@ -1,0 +1,22 @@
+{
+  "release_version": "1.0.0",
+  "release_date": "2026-10-23",
+  "schema_version": "reviewed_ingestion_v1",
+  "internal_use_only": true,
+  "database": "rde_database_2026-10-23.sqlite",
+  "database_sha256": "7f110b2b6a0483e03fa33407eba088c8ed5948b599312ec86619f13be5d8bccb",
+  "views": [
+    "viz_publications",
+    "viz_operating_points",
+    "viz_average_modal_properties",
+    "viz_propulsive_performance",
+    "viz_power_gen_performance",
+    "viz_chamber_pressure"
+  ],
+  "metadata_keys": [
+    "release_version",
+    "release_date",
+    "schema_version",
+    "internal_use_only"
+  ]
+}

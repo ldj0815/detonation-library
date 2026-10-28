@@ -143,7 +143,7 @@ function releaseNote(release: RdeRelease): string {
     return `Operating point numbers are specific to release ${release.release_version} of the RDE database and may change in a later release.`
   }
   return `The values come from release ${release.release_version} (${fmtDate(release.release_date)}) of the RDE database, ` +
-    'an internal development release in which not every review item is resolved. ' +
+    'a development release in which not every review item is resolved. ' +
     'Operating point numbers are specific to this release and may change in a later release.'
 }
 

@@ -11,8 +11,7 @@ The whole database is one file, [`data/cases.csv`](data/cases.csv).
 
 The site currently shows cell widths and lengths, and rotating detonation
 engine operating points from a release of the RDE database (see
-[RDE operating points](#rde-operating-points); the published site's RDE
-category stays empty until that subset is cleared and committed). `data/cases.csv` also holds critical tube
+[RDE operating points](#rde-operating-points)). `data/cases.csv` also holds critical tube
 diameters, minimum tube diameters and critical initiation energies; those are
 kept in the file but not published yet. The switch is one list in two places:
 `HIDDEN_FIELDS` in [`scripts/build_data.py`](scripts/build_data.py), which
@@ -137,19 +136,17 @@ hand; export it again instead. With the raw release present,
 `tests/test_rde_fidelity.py` checks every exported value against the release's
 views.
 
-Release 1.0.0 is an internal development release: its authors mark it
-internal-use-only and keep some review items open. Until it is cleared for
-public distribution:
+Release 1.0.0 is a development release: its authors keep some review items
+open, and its metadata marks it internal-use-only. It was cleared for public
+distribution on 2026-10-27, so `data/rde_subset/` is committed and the build
+step in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) sets
+`RDE_ALLOW_INTERNAL: "1"`.
 
-- `data/rde_subset/` is in `.gitignore`, so it is not committed by accident.
-  Committing and pushing it publishes it.
-- In CI (where the `CI` variable is set, as on GitHub Actions) `build_data.py`
-  refuses a release marked internal-use-only, so a deploy cannot publish it.
-
-Once the release is cleared, remove `data/rde_subset/` from `.gitignore`, set
-`RDE_ALLOW_INTERNAL: "1"` on the build step in
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) (the flag stays
-set in release 1.0.0 itself), and commit the folder.
+In CI (where the `CI` variable is set, as on GitHub Actions) `build_data.py`
+refuses a release marked internal-use-only unless `RDE_ALLOW_INTERNAL` is
+`1`. A later release marked that way needs the same clearance before its
+subset is committed. Committing `data/rde_subset/` publishes it, and the raw
+releases in `data/RDE/` are never committed.
 
 ## For maintainers
 
@@ -201,7 +198,7 @@ The same checks run on every push. A push to `main` also publishes the site.
 |---|---|
 | `data/cases.csv` | The database |
 | `data/TEMPLATE.csv` | Blank template for contributors |
-| `data/rde_subset/` | The RDE operating points the site shows, exported from a release of the RDE database (git-ignored while the release is internal) |
+| `data/rde_subset/` | The RDE operating points the site shows, exported from a release of the RDE database |
 | `scripts/case_schema.py` | The rules every case must pass |
 | `scripts/csv_io.py` | Reads and writes `data/cases.csv` |
 | `scripts/build_data.py` | Checks the data and writes the files the site serves |

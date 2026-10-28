@@ -68,8 +68,8 @@ function AboutData({ release }: { release: RdeRelease | null }) {
       <div className="border-t border-line px-4 py-3 space-y-3 text-[13.5px] text-ink-2">
         {release?.internal_use_only && (
           <p className="text-ink max-w-[80ch]">
-            This is an internal development release of the RDE database, not yet cleared for public distribution.
-            Releasing it does not mean every review item is resolved.
+            This is a development release of the RDE database: some of its review items are still open, and
+            values can change in a later release.
           </p>
         )}
         <ul className="list-disc space-y-1.5 pl-5 max-w-[80ch]">
@@ -193,8 +193,8 @@ export default function RdePage() {
         <span className="num text-ink">{fmtCount(data.publications.length)}</span> {plural(data.publications.length, 'publication', 'publications')}
       </span>
       {release?.internal_use_only && (
-        <span className="badge badge-warn" title="An internal development release of the RDE database, not yet cleared for public distribution.">
-          Internal release
+        <span className="badge badge-warn" title="A development release of the RDE database: some of its review items are still open.">
+          Development release
         </span>
       )}
     </div>
