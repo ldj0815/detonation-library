@@ -1,10 +1,11 @@
-/** Middle horizontal third of the original 628 x 480 test04 recording.
- * Source frames 86..248, crop (0, 160, 628, 160); see render_test04.py.
- * The drawing keeps its illustrative cell dimensions in source pixels.
- */
+import { DEFAULT_BANNER_SETTINGS } from './settings'
+
+/** Full recording; its visible crop and trim are editable in settings.json. */
 export const CLIP = {
-  w: 628, h: 160, fps: 15, duration: 163 / 15,
-  asset: 'test04-center', center: { x: 314, y: 80 },
+  w: 628, h: 480, fps: 15, frames: 249, duration: (DEFAULT_BANNER_SETTINGS.video.endFrame - DEFAULT_BANNER_SETTINGS.video.startFrame) / 15,
+  asset: 'test04-full', center: { x: 314, y: 240 },
+  // Media is encoded at 3x resolution; geometry always uses original pixels.
+  revision: 'clean-aa3-dotfix-1',
   cell: { anchorX: 551, width: 512, height: 366 },
 } as const
 
@@ -30,8 +31,8 @@ const ANCHORS = [
   { frame: 248, x: 94 },
 ] as const
 
-export function clipMotion(time: number) {
-  const frame = 86 + time * CLIP.fps
+export function clipMotion(time: number, startFrame = DEFAULT_BANNER_SETTINGS.video.startFrame) {
+  const frame = startFrame + time * CLIP.fps
   let i = ANCHORS.findIndex((_, index) => index < ANCHORS.length - 1 && frame <= ANCHORS[index + 1].frame)
   if (i < 0) i = ANCHORS.length - 2
   const a = ANCHORS[i], b = ANCHORS[i + 1]
@@ -39,10 +40,10 @@ export function clipMotion(time: number) {
 }
 
 /** Invert the monotonic front path, extrapolating its final speed for the drawing. */
-export function timeAtFront(x: number): number {
+export function timeAtFront(x: number, startFrame = DEFAULT_BANNER_SETTINGS.video.startFrame): number {
   let i = ANCHORS.findIndex((_, index) => index < ANCHORS.length - 1 && x >= ANCHORS[index + 1].x)
   if (i < 0) i = ANCHORS.length - 2
   const a = ANCHORS[i], b = ANCHORS[i + 1]
   const frame = a.frame + (x - a.x) / (b.x - a.x) * (b.frame - a.frame)
-  return (frame - 86) / CLIP.fps
+  return (frame - startFrame) / CLIP.fps
 }

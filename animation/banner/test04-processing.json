@@ -1,18 +1,31 @@
 {
   "source": "animation/Processed Shimadzu videos/test04_2MHz_2H2-O2-12Ar_15kPa/test04_2MHz_2H2-O2-12Ar_15kPa.avi",
   "selection": "Uncompressed raw AVI; cleaner background and fewer clipped highlights than the supplied contrast variants.",
-  "source_frame_start_inclusive": 86,
+  "source_frame_start_inclusive": 0,
   "source_frame_end_exclusive": 249,
   "crop": {
     "x": 0,
-    "y": 160,
+    "y": 0,
     "width": 628,
-    "height": 160
+    "height": 480
   },
-  "asset": "test04-center",
-  "frames": 163,
+  "asset": "test04-full",
+  "sensor_dot_repair": {
+    "x": 304,
+    "y": 216,
+    "affected_frames": 64,
+    "method": "Interpolate only zero-valued samples from the most consistent opposing immediate neighbours before denoising; healthy samples unchanged."
+  },
+  "render": {
+    "width": 1884,
+    "height": 1440,
+    "scale": 3,
+    "antialiasing": "Bicubic supersampling of signed schlieren detail before nonlinear contrast mapping; no frame interpolation or extra sharpening.",
+    "geometry": "Crop, position, zoom and cell calibration remain in original 628 x 480 recording coordinates."
+  },
+  "frames": 249,
   "playback_fps": 15,
-  "duration_seconds": 10.866666666666667,
+  "duration_seconds": 16.6,
   "capture_fps_from_filename": 2000000,
   "poster_source_frame": 150,
   "strip_center_in_original": {
@@ -22,6 +35,16 @@
   "illustrative_cell_original_pixels": {
     "width": 512,
     "height": 366
+  },
+  "theme_cleanup": {
+    "revision": "reference-matched-edge-preserving-v1",
+    "background_frames": [
+      8,
+      32
+    ],
+    "reference": "Median of the identically denoised pre-wave frames; same 0.45 px smoothing as each frame.",
+    "residual_cleanup": "Adaptive pre-wave noise floor, gentle attenuation of weak texture, coherent wave-edge protection; no additional temporal filtering.",
+    "grey_treatment": "Unchanged; retains the original grey background and existing mild denoising."
   },
   "note": "Visual calibration for banner continuity; not measurement data. See site/src/components/banner/clip.ts for trajectory anchors."
 }

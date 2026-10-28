@@ -2,6 +2,7 @@
 // across the band and write fading tracks, as triple points do on a soot foil.
 // One symmetric pair makes a single row of regular diamond cells.
 import { CLIP, clipMotion, timeAtFront } from './clip'
+import { DEFAULT_BANNER_SETTINGS, type BannerSettings } from './settings'
 export { CLIP } from './clip'
 
 /** Part of the clip's width over which the drawing blends into the footage (matches the CSS mask). */
@@ -42,6 +43,7 @@ function rgbOf(hex: string, fallback: string): string {
 }
 
 export class FoilDrawing {
+  private settings: BannerSettings = DEFAULT_BANNER_SETTINGS
   geometry: Geometry = { W: 0, H: 0, dpr: 1, scale: 1, vw: 0, videoLeft: 0, videoOrigin: 0, videoOriginY: 0, speed: 1 }
   private ink = '220,230,245'
   private trace = '244,207,53'
@@ -52,25 +54,29 @@ export class FoilDrawing {
   private previousX = Infinity
   private simulationTime = 0
 
+  configure(settings: BannerSettings) { this.settings = settings }
+
   /** Keep the recording's cell scale, even when a cell extends past the banner. */
   cellSize(): number {
-    return CLIP.cell.width * this.geometry.scale
+    return this.settings.animation.cellWidth * this.geometry.scale
   }
 
   /** The central strip is a window into a larger cell, not a size constraint. */
   cellHeight(): number {
-    return CLIP.cell.height * this.geometry.scale
+    return this.settings.animation.cellHeight * this.geometry.scale
   }
 
   /** Band and clip boxes in page pixels; the clip sits in its box like object-fit: cover. */
   layout(band: Box, clip: Box, dpr: number) {
     const W = band.width, H = band.height
     const vw = clip.width
-    const scale = Math.max(clip.height / CLIP.h, vw / CLIP.w)
+    const v = this.settings.video
+    const scale = Math.max(clip.height / v.cropHeight, vw / v.cropWidth) * v.zoom
     const videoLeft = clip.left - band.left
-    const videoOrigin = videoLeft - (CLIP.w * scale - vw) / 2
-    const videoOriginY = (clip.top ?? 0) - (band.top ?? 0) - (CLIP.h * scale - clip.height) / 2
-    const speed = (clipMotion(CLIP.duration).x - clipMotion(CLIP.duration + 1).x) * scale
+    const videoOrigin = videoLeft - (v.cropWidth * scale - vw) / 2 - v.cropX * scale
+    const videoOriginY = (clip.top ?? 0) - (band.top ?? 0) - (v.cropHeight * scale - clip.height) / 2 - v.cropY * scale
+    const duration = (v.endFrame - v.startFrame) / CLIP.fps
+    const speed = (clipMotion(duration, v.startFrame).x - clipMotion(duration + 1, v.startFrame).x) * scale
     this.geometry = { W, H, dpr: Math.min(2, dpr), scale, vw, videoLeft, videoOrigin, videoOriginY, speed }
     this.reset()
   }
@@ -78,13 +84,13 @@ export class FoilDrawing {
   /** Clip seconds at which the front passes the left edge of the clip's box. */
   clipExitTime(): number {
     const g = this.geometry
-    return timeAtFront((g.videoLeft - g.videoOrigin) / g.scale)
+    return timeAtFront((g.videoLeft - g.videoOrigin) / g.scale, this.settings.video.startFrame)
   }
 
   /** Clip seconds at which the waves have left the band. */
   leaveTime(): number {
     const g = this.geometry
-    return timeAtFront((-MARGIN - g.videoOrigin) / g.scale)
+    return timeAtFront((-MARGIN - g.videoOrigin) / g.scale, this.settings.video.startFrame)
   }
 
   /** Ink for the waves and colour for the tracks, as hex. */
@@ -103,7 +109,7 @@ export class FoilDrawing {
 
   private seedPoints() {
     const g = this.geometry
-    const y = g.videoOriginY + CLIP.center.y * g.scale
+    const y = g.videoOriginY + this.settings.animation.centerY * g.scale
     this.points = [
       { y, py: y, dir: 1, family: 0, energy: 1 },
       { y, py: y, dir: -1, family: 1, energy: 1 },
@@ -112,8 +118,8 @@ export class FoilDrawing {
 
   private stepPoints(x: number, time: number) {
     const g = this.geometry, size = this.cellSize()
-    const centerY = g.videoOriginY + CLIP.center.y * g.scale
-    const collisionX = g.videoOrigin + CLIP.cell.anchorX * g.scale
+    const centerY = g.videoOriginY + this.settings.animation.centerY * g.scale
+    const collisionX = g.videoOrigin + this.settings.animation.anchorX * g.scale
     const distance = collisionX - x
     // Mirrored triangle waves: equal slopes, simultaneous reflections,
     // and a center collision every cell. Motion is identical on every pass.
@@ -140,8 +146,9 @@ export class FoilDrawing {
   /** Move the waves to where the clip's front is at clip-second `time`. */
   advance(time: number) {
     const g = this.geometry
-    const x = g.videoOrigin + clipMotion(time).x * g.scale
-    if (!Number.isFinite(this.previousX)) this.previousX = Math.min(g.W + 2, g.videoOrigin + clipMotion(0).x * g.scale)
+    const start = this.settings.video.startFrame
+    const x = g.videoOrigin + clipMotion(time, start).x * g.scale
+    if (!Number.isFinite(this.previousX)) this.previousX = Math.min(g.W + 2, g.videoOrigin + clipMotion(0, start).x * g.scale)
     const distance = this.previousX - x
     if (distance > 0 && x < g.W + 2) {
       // Fixed spatial substeps keep collisions and curves stable at 15 fps or after a delayed frame.
@@ -153,23 +160,24 @@ export class FoilDrawing {
     }
     this.frontX = x
     this.simulationTime = time
-    this.segments = this.segments.filter(s => time - s.time < TRACE_LIFETIME)
+    this.segments = this.segments.filter(s => time - s.time < this.settings.animation.traceLifetime)
     this.flashes = this.flashes.filter(f => time - f.time < 0.6)
   }
 
   draw(ctx: CanvasRenderingContext2D) {
     const { W, H, dpr, videoLeft, vw } = this.geometry
     const ink = this.ink, trace = this.trace
+    const a = this.settings.animation
     const now = this.simulationTime
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, W, H)
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     for (const s of this.segments) {
-      const life = Math.max(0, 1 - (now - s.time) / TRACE_LIFETIME)
+      const life = Math.max(0, 1 - (now - s.time) / Math.max(0.001, a.traceLifetime))
       const fade = life * life * (3 - 2 * life)
-      ctx.strokeStyle = `rgba(${trace},${(0.55 + 0.4 * s.energy) * fade})`
-      ctx.lineWidth = 1.2 + 0.8 * s.energy
+      ctx.strokeStyle = `rgba(${trace},${(0.55 + 0.4 * s.energy) * fade * a.traceOpacity})`
+      ctx.lineWidth = a.traceWidth * (1 + 2 / 3 * s.energy)
       ctx.beginPath(); ctx.moveTo(s.x1, s.y1); ctx.lineTo(s.x2, s.y2); ctx.stroke()
     }
     for (const f of this.flashes) {
@@ -187,24 +195,24 @@ export class FoilDrawing {
       const cellWidth = this.cellSize(), cellHeight = this.cellHeight()
       const diagonal = Math.hypot(cellWidth, cellHeight)
       for (const p of this.points) {
-        const length = (0.45 + 0.5 * p.energy) * diagonal * 0.6
+        const length = (0.45 + 0.5 * p.energy) * diagonal * a.waveLength
         const ex = frontX + length * cellWidth / diagonal
         const ey = p.y + p.dir * length * cellHeight / diagonal
         const gradient = ctx.createLinearGradient(frontX, p.y, ex, ey)
-        gradient.addColorStop(0, `rgba(${ink},${0.25 + 0.35 * p.energy})`)
+        gradient.addColorStop(0, `rgba(${ink},${(0.25 + 0.35 * p.energy) * a.waveOpacity})`)
         gradient.addColorStop(1, `rgba(${ink},0)`)
         ctx.strokeStyle = gradient
-        ctx.lineWidth = 1.2
+        ctx.lineWidth = a.waveWidth
         ctx.beginPath(); ctx.moveTo(frontX, p.y)
         // The bulge follows the wave's direction of travel while both ends stay put.
         const controlX = frontX + 0.4 * (ex - frontX)
-        const controlY = p.y + 0.7 * (ey - p.y)
+        const controlY = p.y + (0.4 + a.curvature) * (ey - p.y)
         ctx.quadraticCurveTo(controlX, controlY, ex, ey); ctx.stroke()
       }
     }
     // Complement the clip's narrow horizontal mask: nothing is drawn over the footage.
     ctx.globalCompositeOperation = 'destination-in'
-    const mask = ctx.createLinearGradient(videoLeft, 0, videoLeft + vw * FEATHER, 0)
+    const mask = ctx.createLinearGradient(videoLeft, 0, videoLeft + Math.max(0.01, vw * this.settings.layout.feather / 100), 0)
     mask.addColorStop(0, '#000')
     mask.addColorStop(1, 'transparent')
     ctx.fillStyle = mask

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "banner:edit": "vite --host localhost --port 5174 --strictPort --open '/#/banner-editor'",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

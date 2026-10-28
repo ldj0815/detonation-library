@@ -123,3 +123,38 @@ test('blocked autoplay can be retried with the Play control', async () => {
   expect(player.phase).toBe('playing')
   expect(video.paused).toBe(false)
 })
+
+test('edited trim starts at the selected frame and hands off at its end', async () => {
+  const video = new Video(), player = new BannerPlayback(video, {}, { from: 2, to: 5, rate: 0.5 })
+  const starting = player.start('full.mp4'); video.loaded(); await flush()
+  expect(video.seekTarget).toBe(2)
+  expect(video.style.opacity).toBe('0')
+  video.seeked(); await starting
+  video.time = 2.8; player.advance(0.1, 10)
+  expect(player.time).toBeCloseTo(0.8)
+  video.time = 5; player.advance(0.1, 10)
+  expect(player.phase).toBe('tail')
+  expect(video.paused).toBe(true)
+  expect(player.time).toBe(3)
+  player.advance(2, 10)
+  expect(player.time).toBe(4)
+  expect(video.playbackRate).toBe(0.5)
+})
+
+test('scrubbing from the drawn tail back into footage keeps the chosen time paused', async () => {
+  const video = new Video(), player = new BannerPlayback(video, {}, { from: 2, to: 5, rate: 1 })
+  const starting = player.start('full.mp4'); video.loaded(); await flush(); video.seeked(); await starting
+  player.pause()
+  const tail = player.seek(7); await flush(); video.seeked(); await tail
+  expect(video.currentTime).toBe(5)
+  expect(player.time).toBe(7)
+  expect(player.phase).toBe('tail')
+  const back = player.seek(1.5); await flush(); video.seeked(); await back
+  expect(video.currentTime).toBe(3.5)
+  expect(player.time).toBe(1.5)
+  expect(player.paused).toBe(true)
+  expect(video.paused).toBe(true)
+  expect(player.phase).toBe('playing')
+  await player.resume()
+  expect(video.paused).toBe(false)
+})

@@ -1,6 +1,7 @@
 import { test, expect } from 'vitest'
 import { FoilDrawing, CLIP, TRACE_LIFETIME } from './drawing'
 import { clipMotion, timeAtFront } from './clip'
+import { DEFAULT_BANNER_SETTINGS, parseBannerSettings } from './settings'
 
 const band = { left: 0, width: 1200, height: 440 }
 const clip = { left: 600, width: 600, height: 440 }
@@ -13,7 +14,7 @@ test('the clip box is treated like object-fit: cover', () => {
   const d = new FoilDrawing()
   d.layout(band, clip, 1)
   const g = d.geometry
-  expect(g.scale).toBeCloseTo(440 / CLIP.h)
+  expect(g.scale).toBeCloseTo(440 / DEFAULT_BANNER_SETTINGS.video.cropHeight)
   expect(g.videoLeft).toBe(600)
   // The clip is wider than its box at this scale, so its own x = 0 lies left of the box.
   expect(g.videoOrigin).toBeLessThan(600)
@@ -76,7 +77,8 @@ test('the handoff uses the visible video crop, including vertical crop on wide s
   const g = d.geometry
   expect(g.videoOriginY).toBeLessThan(0)
   expect(g.dpr).toBe(2)
-  expect(g.videoOriginY + CLIP.h / 2 * g.scale).toBeCloseTo(200)
+  const { cropY, cropHeight } = DEFAULT_BANNER_SETTINGS.video
+  expect(g.videoOriginY + (cropY + cropHeight / 2) * g.scale).toBeCloseTo(200)
   d.advance(d.clipExitTime() - 0.01)
   d.advance(d.clipExitTime() + 0.01)
   const points = (d as unknown as { points: { y: number }[] }).points
@@ -86,9 +88,23 @@ test('the handoff uses the visible video crop, including vertical crop on wide s
 
 test('gold traces expire completely at two seconds', () => {
   const d = new FoilDrawing()
+  d.configure(parseBannerSettings({ ...DEFAULT_BANNER_SETTINGS, animation: { ...DEFAULT_BANNER_SETTINGS.animation, traceLifetime: TRACE_LIFETIME } }))
   d.layout(band, clip, 1)
   for (let time = 0; time < 14; time += 0.05) d.advance(time)
   const state = d as unknown as { simulationTime: number; segments: { time: number }[] }
   expect(state.segments.length).toBeGreaterThan(0)
   for (const segment of state.segments) expect(state.simulationTime - segment.time).toBeLessThan(TRACE_LIFETIME)
+})
+
+test('an edited crop and zoom align the full recording with the drawn waves', () => {
+  const d = new FoilDrawing()
+  const settings = parseBannerSettings({ version: 1, video: { cropX: 180, cropY: 30, cropWidth: 240, cropHeight: 160, zoom: 1.2 }, animation: { traceLifetime: 0.5 } })
+  d.configure(settings)
+  d.layout(band, clip, 1)
+  const g = d.geometry
+  expect(g.videoOrigin + (settings.video.cropX + settings.video.cropWidth / 2) * g.scale).toBeCloseTo(900)
+  expect(g.videoOriginY + (settings.video.cropY + settings.video.cropHeight / 2) * g.scale).toBeCloseTo(220)
+  for (let time = 0; time <= 12; time += 0.1) d.advance(time)
+  const segments = (d as unknown as { segments: { time: number }[] }).segments
+  for (const segment of segments) expect(12 - segment.time).toBeLessThanOrEqual(0.51)
 })

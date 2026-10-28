@@ -3,19 +3,61 @@
 This folder contains the original standalone header study and the media renderer
 for the production React banner in `site/src/components/banner/`.
 
+## Interactive local editor
+
+Double-click `Open Banner Editor.command` in the repository root, or run
+`npm run banner:edit` from `site/`. Open <http://localhost:5174/#/banner-editor>.
+Keep the editor's terminal window open while working.
+
+The editor uses the same banner renderer as the homepage. It includes:
+
+- Light and dark previews, plus accurate desktop and phone viewports.
+- Pause, restart, frame stepping and a timeline that includes the drawn tail.
+- A draggable crop on the full original recording, crop presets, zoom, opacity,
+  softening, and theme-matched or original-grey footage.
+- Cell dimensions and position, wave curvature and length, colours, line widths,
+  trace lifetime, video share, feathering, trim and playback speed.
+- Undo/redo, browser draft recovery, and settings import/download.
+
+**Save to project** writes `site/src/components/banner/settings.json`; the local
+homepage immediately uses it. It does not commit or publish. The editor and save
+endpoint run only in the local development server and are excluded from the
+production website. The endpoint accepts only validated settings for this fixed
+file, from the same localhost origin with a session token.
+
+The recording is prepared once at full resolution, so editing its crop does not
+require rendering new videos. A draft stays in that browser until saved, reset,
+or replaced with an imported settings file. The timeline's yellow marker is the
+end of the video segment; animation can continue past it. Arrow keys step one
+frame, Page Up/Down move one second, and Home/End jump to the loop's ends.
+
 ## Current production footage: test04
 
 The production banner uses the uncompressed `test04_2MHz_2H2-O2-12Ar_15kPa.avi`.
 The raw version keeps more highlight detail and gives a cleaner processed
-background than the supplied contrast exports. Frames 86–248 use the middle
-horizontal third of the original 628 × 480 recording: a 628 × 160 strip at
-(0, 160), centered on the original y = 240 line, without padding. The result
-plays at 15 fps for 10.87 seconds; capture was at 2 MHz. The banner displays a
-centered window into this strip using `object-fit: cover`.
+background than the supplied contrast exports. The full 628 × 480 recording,
+frames 0–248, is prepared at 15 fps (16.6 seconds). Capture was at 2 MHz. The
+saved settings currently select frames 86–248 and a 628 × 160 strip at (0, 160),
+centered on the original y = 240 line. The video and drawing use the same crop
+and scale; a centered window into the selected area fills the video panel.
 
-`render_test04.py` produces the `test04-center` light and dark MP4s and still images in
+`render_test04.py` produces the `test04-full` light, dark and grey MP4s and still images in
 `site/public/banner/`. It subtracts a pre-wave background, denoises the footage,
-and maps it to the site's theme colors. To regenerate, use Python with numpy,
+and maps it to the site's theme colors. The background reference now uses the
+same denoising and smoothing as the footage, avoiding residual stationary texture.
+A gentle, adaptive cleanup suppresses weak blotches while protecting coherent
+wave edges. It leaves strong contrast intact and adds no temporal averaging.
+The encoded footage and posters are supersampled 3× to 1884 × 1440. Signed
+schlieren detail is interpolated before contrast mapping to reduce stair steps
+and dotted contours; simply enlarging a finished frame does not fix those.
+This smooths the rendering without creating additional captured detail. Crop,
+zoom, positioning and all editor dimensions still use the original 628 × 480
+coordinates, so the selected region stays identical. No frame interpolation or
+extra sharpening is used. The intermittent black sensor pixel at (304, 216) is
+repaired only when it reads zero, before denoising, by interpolating along the
+most consistent pair of immediate neighbours. Healthy samples are untouched.
+The grey treatment retains its existing denoising,
+with the same bicubic enlargement. To regenerate, use Python with numpy,
 Pillow and scipy, and pass `--ffmpeg /path/to/ffmpeg` if needed. The original
 source files stay local and are not included in the website deployment.
 

@@ -13,6 +13,8 @@ const RdeDetail = lazy(() => import('./pages/rde/RdeDetail'))
 const PlotPage = lazy(() => import('./pages/plot/PlotPage'))
 const Contribute = lazy(() => import('./pages/Contribute'))
 const About = lazy(() => import('./pages/About'))
+const BannerEditor = import.meta.env.DEV ? lazy(() => import('./pages/BannerEditor')) : null
+const BannerPreview = import.meta.env.DEV ? lazy(() => import('./pages/BannerPreview')) : null
 
 // A new page opens at its top. Back and forward (POP) keep the browser's own
 // scroll position, and filter changes keep the pathname, so neither jumps.
@@ -26,6 +28,9 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const location = useLocation()
+  if (BannerEditor && location.pathname === '/banner-editor') return <Suspense fallback={<div className="p-8">Opening banner editor…</div>}><BannerEditor /></Suspense>
+  if (BannerPreview && location.pathname === '/banner-preview') return <Suspense fallback={null}><BannerPreview /></Suspense>
   return (
     <div className="min-h-screen flex flex-col">
       <a

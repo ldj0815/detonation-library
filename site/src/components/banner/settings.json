@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "video": {
+    "cropWidth": 466.61261861253945,
+    "cropHeight": 174.50064798450222,
+    "cropX": 110.09791369604625,
+    "cropY": 153.0592064092141,
+    "startFrame": 32,
+    "endFrame": 249,
+    "zoom": 1,
+    "treatment": "matched",
+    "opacity": 0.8,
+    "soften": 0,
+    "rate": 1,
+    "fade": true,
+    "linger": 0.4,
+    "fadeDuration": 1.5
+  },
+  "animation": {
+    "cellWidth": 512,
+    "cellHeight": 366,
+    "anchorX": 551,
+    "centerY": 240,
+    "curvature": 0.3,
+    "waveLength": 0.6,
+    "waveOpacity": 1,
+    "waveWidth": 1.2,
+    "traceLifetime": 4,
+    "traceOpacity": 1,
+    "traceWidth": 1.2,
+    "traceColor": "auto",
+    "waveColor": "auto"
+  },
+  "layout": {
+    "videoWidth": 100,
+    "feather": 8,
+    "verticalFeather": 5,
+    "height": 0
+  }
+}
