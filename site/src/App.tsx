@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import { Routes, Route, Navigate, useLocation, useNavigationType } from 'react-router-dom'
+import { lazy, Suspense, useLayoutEffect } from 'react'
 import AppHeader from './components/AppHeader'
 import AppFooter from './components/AppFooter'
 import Skeleton from './components/Skeleton'
@@ -8,9 +8,22 @@ import { CATEGORIES } from './lib/categories'
 const Home = lazy(() => import('./pages/Home'))
 const BrowsePage = lazy(() => import('./pages/browse/BrowsePage'))
 const CaseDetail = lazy(() => import('./pages/cases/CaseDetail'))
+const RdePage = lazy(() => import('./pages/rde/RdePage'))
+const RdeDetail = lazy(() => import('./pages/rde/RdeDetail'))
 const PlotPage = lazy(() => import('./pages/plot/PlotPage'))
 const Contribute = lazy(() => import('./pages/Contribute'))
 const About = lazy(() => import('./pages/About'))
+
+// A new page opens at its top. Back and forward (POP) keep the browser's own
+// scroll position, and filter changes keep the pathname, so neither jumps.
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  const navigationType = useNavigationType()
+  useLayoutEffect(() => {
+    if (navigationType !== 'POP') window.scrollTo(0, 0)
+  }, [pathname, navigationType])
+  return null
+}
 
 export default function App() {
   return (
@@ -21,6 +34,7 @@ export default function App() {
       >
         Skip to content
       </a>
+      <ScrollToTop />
       <AppHeader />
       <main id="main" className="flex-1">
         <Suspense fallback={<div className="container-x py-10"><Skeleton rows={6} /></div>}>
@@ -31,8 +45,9 @@ export default function App() {
             <Route path="/cases" element={<BrowsePage mode="all" />} />
             <Route path="/cases/:id" element={<CaseDetail />} />
             {CATEGORIES.filter(c => c.mode !== 'all').map(c => (
-              <Route key={c.mode} path={c.path} element={<BrowsePage mode={c.mode} />} />
+              <Route key={c.mode} path={c.path} element={c.mode === 'rde' ? <RdePage /> : <BrowsePage mode={c.mode} />} />
             ))}
+            <Route path="/browse/rde/:id" element={<RdeDetail />} />
             <Route path="/browse/*" element={<Navigate to="/cases" replace />} />
             <Route path="/plot" element={<PlotPage />} />
             <Route path="/contribute" element={<Contribute />} />

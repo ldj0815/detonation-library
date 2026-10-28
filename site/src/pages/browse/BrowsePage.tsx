@@ -66,7 +66,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
     pressure_max: numberParam(params, 'pressure_max'),
     temperature_min: numberParam(params, 'temperature_min'),
     temperature_max: numberParam(params, 'temperature_max'),
-    ...(category.mode === 'rde' ? {} : { setup: listValues(params, 'setup').join(',') || undefined }),
+    setup: listValues(params, 'setup').join(',') || undefined,
     ...category.filter,
     sort_by: sortBy,
     sort_dir: sortDir,
@@ -123,7 +123,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
             <Icon name="chevronDown" size={14} className={filtersOpen ? 'rotate-180' : ''} />
           </button>
           <div id="facet-rail" className={`${filtersOpen ? 'block mt-3 panel p-4' : 'hidden'} md:block md:mt-0 md:p-0 md:border-0 md:bg-transparent`}>
-            <FacetRail hideSetup={category.mode === 'rde'} focusSearch={focusSearch} />
+            <FacetRail focusSearch={focusSearch} />
           </div>
         </aside>
 
@@ -174,7 +174,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
               {activeCount > 0
                 ? 'Try removing a filter or widening a range.'
                 : category.placeholder
-                  ? 'This category is ready for contributed data. Rows with the setup "rde" in the template land here.'
+                  ? 'This category is ready for contributed data.'
                   : 'This category has no cases yet.'}
             </EmptyState>
           )}

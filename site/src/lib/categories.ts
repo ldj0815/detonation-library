@@ -16,6 +16,8 @@ export interface Category {
   unit?: string
   /** Listed before it has any data, to invite contributions. */
   placeholder?: boolean
+  /** What one entry is called: "cases" unless set. */
+  noun?: string
 }
 
 const ALL_CATEGORIES: Category[] = [
@@ -66,9 +68,9 @@ const ALL_CATEGORIES: Category[] = [
     mode: 'rde',
     path: '/browse/rde',
     label: 'RDE',
-    description: 'Rotating detonation engine runs.',
+    description: 'Rotating detonation engine operating points from published experiments: flow conditions, combustor geometry, wave modes and speeds, thrust and specific impulse.',
     filter: { setup: 'rde' },
-    placeholder: true,
+    noun: 'operating points',
   },
 ]
 

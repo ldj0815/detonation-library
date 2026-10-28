@@ -16,13 +16,14 @@ export default function AppFooter() {
           </p>
           <p>
             When you use specific values, cite the original publication listed in the case's reference, not this
-            library. Pressures are in kPa, temperatures in K, lengths in mm, energies in J.
+            library. Cell-size cases give pressures in kPa, temperatures in K and lengths in mm; RDE columns name
+            their unit.
           </p>
         </div>
         <nav className="flex md:flex-col gap-x-6 gap-y-2 md:text-right" aria-label="Footer">
           <Link to="/about">About and how to cite</Link>
           <Link to="/contribute">Contribute data</Link>
-          <a href={`${import.meta.env.BASE_URL}cases.csv`} download="detonation-library-cases.csv">Download the whole dataset (CSV)</a>
+          <a href={`${import.meta.env.BASE_URL}cases.csv`} download="detonation-library-cases.csv">Download the cell-size cases (CSV)</a>
           <a href={REPO_URL} target="_blank" rel="noopener noreferrer">Source and data on GitHub</a>
         </nav>
       </div>

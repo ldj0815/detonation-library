@@ -82,12 +82,10 @@ function CheckboxGroup({ param, options, defaultOpen }: { param: ListParam; opti
 }
 
 interface FacetRailProps {
-  /** Hide the setup facet (for the RDE category, where it is fixed). */
-  hideSetup?: boolean
   focusSearch?: boolean
 }
 
-export default function FacetRail({ hideSetup = false, focusSearch = false }: FacetRailProps) {
+export default function FacetRail({ focusSearch = false }: FacetRailProps) {
   const [params, setParams] = useSearchParams()
   const formRef = useRef<HTMLFormElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
@@ -118,7 +116,7 @@ export default function FacetRail({ hideSetup = false, focusSearch = false }: Fa
     formRef.current?.reset()
   }
 
-  const showSetup = !hideSetup && (opts?.setups.length ?? 0) > 1
+  const showSetup = (opts?.setups.length ?? 0) > 1
 
   return (
     <form ref={formRef} onSubmit={apply} className="text-[13px]">

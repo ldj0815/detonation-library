@@ -19,8 +19,9 @@ describe('visible categories', () => {
     expect(categoryFor('critical-hd')).toBe(DEFAULT_CATEGORY)
   })
 
-  it('keeps RDE as a placeholder', () => {
-    expect(categoryFor('rde').placeholder).toBe(true)
+  it('lists RDE operating points as a category of their own', () => {
+    expect(categoryFor('rde').placeholder).toBeFalsy()
+    expect(categoryFor('rde').noun).toBe('operating points')
   })
 
   it('drops the hidden columns from the table and the export', () => {

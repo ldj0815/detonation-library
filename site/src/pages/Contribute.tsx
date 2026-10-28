@@ -42,7 +42,7 @@ export default function Contribute() {
               Put the paper the value comes from in <span className="num">doi_reference</span>.
             </p>
             <ul className="mt-2 text-[13.5px] text-ink-2 max-w-[64ch] list-disc ml-5 space-y-1">
-              <li><span className="num">setup</span> is <span className="num">detonation</span> or <span className="num">rde</span>; <span className="num">geometry</span> is free text such as "round tube" or "rectangular channel 50x30mm".</li>
+              <li><span className="num">setup</span> is <span className="num">detonation</span>; <span className="num">geometry</span> is free text such as "round tube" or "rectangular channel 50x30mm". The RDE operating points come from the RDE database, not from this template.</li>
               <li>Additional diluents are <span className="num">name:percentage</span> pairs separated by commas; additional dopants are <span className="num">name:ppm</span> pairs.</li>
             </ul>
           </Step>

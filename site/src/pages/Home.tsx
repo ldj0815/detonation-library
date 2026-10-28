@@ -96,23 +96,27 @@ export default function Home() {
           initial pressure and temperature. Open a category to filter it.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 max-w-[760px]">
-          {categories.map(c => (
-            <Link key={c.mode} to={c.path} className="panel group flex flex-col p-5 hover:no-underline hover:border-accent transition-colors">
-              <span className="flex items-center gap-2 text-[16px] font-semibold text-ink group-hover:text-accent">
-                {c.label}
-                {c.placeholder && <span className="badge">Coming</span>}
-              </span>
-              <span className="mt-2 text-[13.5px] text-ink-2 leading-relaxed flex-1">
-                {c.placeholder ? `${c.description} Nothing contributed yet; this is where they will appear.` : c.description}
-              </span>
-              <span className="mt-4 text-[13px] text-ink-2">
-                {c.placeholder
-                  ? 'Contribute the first runs'
-                  : <><span className="num text-ink">{counts.data ? fmtCount(counts.data[c.mode]) : '…'}</span> cases</>}
-                <Icon name="arrowRight" size={13} className="inline ml-1.5 text-ink-3 group-hover:text-accent" />
-              </span>
-            </Link>
-          ))}
+          {categories.map(c => {
+            // A category with nothing published yet says so instead of showing 0.
+            const empty = c.placeholder || counts.data?.[c.mode] === 0
+            return (
+              <Link key={c.mode} to={c.path} className="panel group flex flex-col p-5 hover:no-underline hover:border-accent transition-colors">
+                <span className="flex items-center gap-2 text-[16px] font-semibold text-ink group-hover:text-accent">
+                  {c.label}
+                  {empty && <span className="badge">Coming</span>}
+                </span>
+                <span className="mt-2 text-[13.5px] text-ink-2 leading-relaxed flex-1">
+                  {empty ? `${c.description} None published yet; this is where they will appear.` : c.description}
+                </span>
+                <span className="mt-4 text-[13px] text-ink-2">
+                  {empty
+                    ? 'Not published yet'
+                    : <><span className="num text-ink">{counts.data?.[c.mode] != null ? fmtCount(counts.data[c.mode]) : '…'}</span> {c.noun ?? 'cases'}</>}
+                  <Icon name="arrowRight" size={13} className="inline ml-1.5 text-ink-3 group-hover:text-accent" />
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </section>
 
@@ -140,12 +144,14 @@ export default function Home() {
           <div>
             <h2 className="text-[20px] font-semibold">Use the data, add to it</h2>
             <p className="mt-2 text-[14px] text-ink-2 leading-relaxed max-w-[56ch]">
-              The whole library is one CSV file you can download and work with directly. New
-              cell-size measurements or RDE runs from your own experiments go in through the same
-              template: fill one row per case and send the file through GitHub.
+              The cell-size cases are one CSV file and the RDE operating points another, both
+              ready to download and work with directly. New cell-size measurements from your own
+              experiments go in through a template: fill one row per case and send the file
+              through GitHub.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <a href={`${import.meta.env.BASE_URL}cases.csv`} download="detonation-library-cases.csv" className="btn btn-primary hover:no-underline"><Icon name="download" size={15} /> Download all cases (CSV)</a>
+              {counts.data?.rde ? <a href={`${import.meta.env.BASE_URL}rde.csv`} download="rde-operating-points.csv" className="btn btn-secondary hover:no-underline"><Icon name="download" size={15} /> RDE operating points (CSV)</a> : null}
               <Link to="/contribute" className="btn btn-secondary hover:no-underline"><Icon name="upload" size={15} /> Contribute data</Link>
               <Link to="/plot" className="btn btn-secondary hover:no-underline"><Icon name="chart" size={15} /> Plot the data</Link>
             </div>

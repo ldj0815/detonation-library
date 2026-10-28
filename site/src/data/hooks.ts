@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { loadCases } from './loadCases'
+import { useRde } from './rde'
 import { filterCases, filterOptions, queryCases, sortCases } from './query'
 import type { CaseListParams } from './query'
 import { CATEGORIES, type BrowseMode } from '../lib/categories'
@@ -68,17 +69,22 @@ export function useFilterOptions(): { data: FilterOptions | undefined } {
   return { data }
 }
 
-/** Case count per browse category. */
-export function useCategoryCounts(): { data: Record<BrowseMode, number> | undefined } {
+/** Entry count per browse category. RDE counts the operating points in
+ *  rde.json, which live apart from the cases; it is missing until that file
+ *  has loaded, and stays missing if it fails, so the case counts never wait
+ *  for it and a load error does not read as an empty category. */
+export function useCategoryCounts(): { data: Partial<Record<BrowseMode, number>> | undefined } {
   const cases = useCases()
+  const rde = useRde()
+  const rdeCount = rde.data?.operating_points.length
   const data = useMemo(() => {
     if (!cases.data) return undefined
     const all = cases.data
-    return {
-      all: all.length,
-      ...Object.fromEntries(CATEGORIES.map(c => [c.mode, filterCases(all, c.filter).length])),
-    } as Record<BrowseMode, number>
-  }, [cases.data])
+    const counts: Partial<Record<BrowseMode, number>> = { all: all.length }
+    for (const c of CATEGORIES) if (c.mode !== 'rde') counts[c.mode] = filterCases(all, c.filter).length
+    if (rdeCount !== undefined) counts.rde = rdeCount
+    return counts
+  }, [cases.data, rdeCount])
   return { data }
 }
 

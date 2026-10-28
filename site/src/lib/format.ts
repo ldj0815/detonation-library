@@ -97,7 +97,9 @@ export function measurementsOf(c: Pick<CaseListItem,
 
 export function fmtDate(iso: string | null | undefined): string {
   if (!iso) return '—'
-  const d = new Date(iso)
+  // A bare YYYY-MM-DD is a calendar date: read it in local time, not as UTC
+  // midnight, which shows the day before west of UTC.
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T00:00` : iso)
   if (Number.isNaN(d.getTime())) return '—'
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }

@@ -6,11 +6,15 @@ interface Props {
   counts?: Partial<Record<BrowseMode, number>>
 }
 
+// Sorting, paging and the RDE page's view and plot settings belong to one
+// category: the others would read them as an unknown sort or ignore them.
+const NOT_CARRIED = ['offset', 'sort_by', 'sort_dir', 'view', 'x', 'y', 'color', 'logx', 'logy']
+
 /** Category tabs. Filters in the URL carry over when switching category. */
 export default function CategoryTabs({ active, counts }: Props) {
   const [params] = useSearchParams()
   const carried = new URLSearchParams(params)
-  carried.delete('offset')
+  for (const key of NOT_CARRIED) carried.delete(key)
   const qs = carried.toString()
 
   return (
