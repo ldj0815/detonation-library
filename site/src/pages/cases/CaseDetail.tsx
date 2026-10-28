@@ -141,7 +141,7 @@ export default function CaseDetail() {
 
   const downloadJson = () => downloadText(JSON.stringify(data, null, 2), `case_${data.id}.json`, 'application/json')
   const downloadCsv = () => downloadText(toCsv([data as unknown as Record<string, unknown>], [...CASE_CSV_COLUMNS, 'contributor_institution', 'contributor_email', 'notes']), `case_${data.id}.csv`, 'text/csv')
-  const plotSimilar = `/plot?fuel=${encodeURIComponent(data.fuel)}&oxidizer=${encodeURIComponent(data.oxidizer)}`
+  const plotSimilar = `/browse/cell-size?view=plot&fuel=${encodeURIComponent(data.fuel)}&oxidizer=${encodeURIComponent(data.oxidizer)}`
 
   return (
     <div>

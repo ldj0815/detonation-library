@@ -20,6 +20,10 @@ export const LIST_LABELS: Record<ListParam, string> = {
   primary_dopant_name: 'Dopant',
 }
 
+/** One publication, whole: a reference such as "27, Bull (1982)" has a comma,
+ *  so this parameter is not a comma-separated list. */
+export const REFERENCE_PARAM = 'ref'
+
 export function listValues(params: URLSearchParams, key: string): string[] {
   return (params.get(key) ?? '').split(',').map(s => s.trim()).filter(Boolean)
 }
@@ -31,6 +35,21 @@ export function numberParam(params: URLSearchParams, key: string): number | unde
   return Number.isFinite(n) ? n : undefined
 }
 
+// URL parameters that belong to one category: its sorting and paging, its
+// paper filter, and its plot settings. The view (table, plot, publications)
+// exists in every category and carries over.
+const CATEGORY_ONLY = [
+  'offset', 'sort_by', 'sort_dir', REFERENCE_PARAM, 'publication',
+  'x', 'y', 'color', 'shape', 'logx', 'logy', 'xmin', 'xmax', 'ymin', 'ymax',
+]
+
+/** The params to take along when switching category. */
+export function categorySwitchParams(params: URLSearchParams): URLSearchParams {
+  const next = new URLSearchParams(params)
+  for (const key of CATEGORY_ONLY) next.delete(key)
+  return next
+}
+
 /** Number of active user filters (not counting sort, paging or the category). */
 export function countActiveFilters(params: URLSearchParams): number {
   let n = 0
@@ -40,6 +59,7 @@ export function countActiveFilters(params: URLSearchParams): number {
     if (params.get(`${r.key}_max`)) n += 1
   }
   if (params.get('q')?.trim()) n += 1
+  if (params.get(REFERENCE_PARAM)?.trim()) n += 1
   return n
 }
 
@@ -52,6 +72,7 @@ export function clearFilters(params: URLSearchParams): URLSearchParams {
     next.delete(`${r.key}_max`)
   }
   next.delete('q')
+  next.delete(REFERENCE_PARAM)
   next.delete('offset')
   return next
 }

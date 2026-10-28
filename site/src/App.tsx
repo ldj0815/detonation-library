@@ -10,11 +10,17 @@ const BrowsePage = lazy(() => import('./pages/browse/BrowsePage'))
 const CaseDetail = lazy(() => import('./pages/cases/CaseDetail'))
 const RdePage = lazy(() => import('./pages/rde/RdePage'))
 const RdeDetail = lazy(() => import('./pages/rde/RdeDetail'))
-const PlotPage = lazy(() => import('./pages/plot/PlotPage'))
 const Contribute = lazy(() => import('./pages/Contribute'))
 const About = lazy(() => import('./pages/About'))
 const BannerEditor = import.meta.env.DEV ? lazy(() => import('./pages/BannerEditor')) : null
 const BannerPreview = import.meta.env.DEV ? lazy(() => import('./pages/BannerPreview')) : null
+
+// The plot used to be a page of its own; old links keep their filters.
+function PlotRedirect() {
+  const params = new URLSearchParams(useLocation().search)
+  params.set('view', 'plot')
+  return <Navigate to={`/browse/cell-size?${params}`} replace />
+}
 
 // A new page opens at its top. Back and forward (POP) keep the browser's own
 // scroll position, and filter changes keep the pathname, so neither jumps.
@@ -54,7 +60,7 @@ export default function App() {
             ))}
             <Route path="/browse/rde/:id" element={<RdeDetail />} />
             <Route path="/browse/*" element={<Navigate to="/cases" replace />} />
-            <Route path="/plot" element={<PlotPage />} />
+            <Route path="/plot" element={<PlotRedirect />} />
             <Route path="/contribute" element={<Contribute />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

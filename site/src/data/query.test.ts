@@ -105,6 +105,29 @@ describe('filterCases', () => {
   })
 })
 
+describe('filterCases by publication', () => {
+  // Two papers can share an author and year; the GALCIT number tells them apart.
+  const cases = [
+    make(1, { title: 'bu82a [22, Bull (1982)]' }),
+    make(2, { title: 'bu82b [27, Bull (1982)]' }),
+    make(3, { title: 'Run 1', doi_reference: ' 10.1016/j.combustflame.2020.01.001 ' }),
+    make(4, { title: 'Run 2' }),
+  ]
+
+  it('keeps the cases of exactly that reference', () => {
+    expect(ids(filterCases(cases, { reference: '27, Bull (1982)' }))).toEqual([2])
+    expect(ids(filterCases(cases, { reference: '22, Bull (1982)' }))).toEqual([1])
+  })
+
+  it('falls back to the reference field when the title has none', () => {
+    expect(ids(filterCases(cases, { reference: '10.1016/j.combustflame.2020.01.001' }))).toEqual([3])
+  })
+
+  it('does not filter without a reference', () => {
+    expect(ids(filterCases(cases, { reference: undefined }))).toEqual([1, 2, 3, 4])
+  })
+})
+
 describe('sortCases', () => {
   const cases = [
     make(1, { cell_width_mm: 5, fuel: 'H2', created_at: '2026-04-08T06:00:00Z' }),

@@ -1,27 +1,27 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { CATEGORIES, type BrowseMode } from '../lib/categories'
+import { categorySwitchParams } from './filters'
 
 interface Props {
   active: BrowseMode
   counts?: Partial<Record<BrowseMode, number>>
 }
 
-// Sorting, paging and the RDE page's view and plot settings belong to one
-// category: the others would read them as an unknown sort or ignore them.
-const NOT_CARRIED = ['offset', 'sort_by', 'sort_dir', 'view', 'x', 'y', 'color', 'logx', 'logy']
-
-/** Category tabs. Filters in the URL carry over when switching category. */
+/** Category tabs. Filters and the view carry over when switching category. */
 export default function CategoryTabs({ active, counts }: Props) {
   const [params] = useSearchParams()
-  const carried = new URLSearchParams(params)
-  for (const key of NOT_CARRIED) carried.delete(key)
-  const qs = carried.toString()
+  // The active tab keeps everything but the page; the others take what carries over.
+  const own = new URLSearchParams(params)
+  own.delete('offset')
+  const ownQs = own.toString()
+  const otherQs = categorySwitchParams(params).toString()
 
   return (
     <nav className="-mb-px flex gap-1 overflow-x-auto no-scrollbar" aria-label="Categories">
       {CATEGORIES.map(c => {
         const isActive = c.mode === active
         const n = counts?.[c.mode]
+        const qs = isActive ? ownQs : otherQs
         return (
           <Link
             key={c.mode}

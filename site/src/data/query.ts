@@ -1,5 +1,6 @@
 import type { CaseDetail, FilterOption, FilterOptions } from '../types/case'
 import type { PaginatedResponse } from '../types/common'
+import { caseReference } from '../lib/format'
 
 export interface CaseListParams {
   q?: string
@@ -9,6 +10,8 @@ export interface CaseListParams {
   setup?: string
   primary_diluent_name?: string
   primary_dopant_name?: string
+  /** One publication, as caseReference() gives it ("27, Bull (1982)"). */
+  reference?: string
   equivalence_ratio_min?: number
   equivalence_ratio_max?: number
   pressure_min?: number
@@ -80,6 +83,7 @@ export function filterCases(cases: CaseDetail[], params: CaseListParams): CaseDe
     inList(c.setup, params.setup) &&
     inNullableList(c.primary_diluent_name, params.primary_diluent_name) &&
     inNullableList(c.primary_dopant_name, params.primary_dopant_name) &&
+    (!params.reference || caseReference(c) === params.reference) &&
     inRange(c.equivalence_ratio, params.equivalence_ratio_min, params.equivalence_ratio_max) &&
     inRange(c.initial_pressure_kpa, params.pressure_min, params.pressure_max) &&
     inRange(c.initial_temperature_k, params.temperature_min, params.temperature_max) &&

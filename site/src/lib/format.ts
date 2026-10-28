@@ -4,12 +4,23 @@ export const GALCIT_REFERENCES_URL = 'https://shepherd.caltech.edu/detn_db/html/
 export const GALCIT_DB_URL = 'https://shepherd.caltech.edu/detn_db/html/'
 export const GALCIT_REPORT_DOI = 'https://doi.org/10.7907/g3gs-4y69'
 
+// One formatter per precision: toLocaleString with options builds a new one on
+// every call, which adds up over a plot's thousands of hover labels.
+const formatters = new Map<number, Intl.NumberFormat>()
+function formatter(maxDecimals: number): Intl.NumberFormat {
+  let f = formatters.get(maxDecimals)
+  if (!f) {
+    f = new Intl.NumberFormat('en-US', { maximumFractionDigits: maxDecimals })
+    formatters.set(maxDecimals, f)
+  }
+  return f
+}
+
 /** Numbers are shown as stored, with thousands grouping and at most four decimals. */
 export function fmtNum(v: number | null | undefined, maxDecimals = 4): string {
   if (v == null || !Number.isFinite(v)) return '—'
-  if (Number.isInteger(v)) return v.toLocaleString('en-US')
-  const rounded = Number(v.toFixed(maxDecimals))
-  return rounded.toLocaleString('en-US', { maximumFractionDigits: maxDecimals })
+  if (Number.isInteger(v)) return formatter(3).format(v)
+  return formatter(maxDecimals).format(Number(v.toFixed(maxDecimals)))
 }
 
 /** "14 ± 1 mm", "14 mm" or "—". */
@@ -34,6 +45,13 @@ export function parseTitle(title: string): { key: string | null; reference: stri
   const m = /^([A-Za-z0-9_.-]+)\s*\[(.+)\]\s*$/.exec(title.trim())
   if (m) return { key: m[1], reference: m[2].trim(), plain: title }
   return { key: null, reference: null, plain: title }
+}
+
+/** The publication a case comes from: the reference in its title, else its
+ *  reference field. GALCIT references keep their number ("27, Bull (1982)"),
+ *  which tells apart two papers with the same author and year. */
+export function caseReference(c: Pick<CaseListItem, 'title' | 'doi_reference'>): string | null {
+  return parseTitle(c.title).reference ?? (c.doi_reference?.trim() || null)
 }
 
 export interface ParsedReference {

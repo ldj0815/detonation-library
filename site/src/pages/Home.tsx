@@ -104,7 +104,7 @@ export default function Home() {
               <a href={`${import.meta.env.BASE_URL}cases.csv`} download="detonation-library-cases.csv" className="btn btn-primary hover:no-underline"><Icon name="download" size={15} /> Download all cases (CSV)</a>
               {counts.data?.rde ? <a href={`${import.meta.env.BASE_URL}rde.csv`} download="rde-operating-points.csv" className="btn btn-secondary hover:no-underline"><Icon name="download" size={15} /> RDE operating points (CSV)</a> : null}
               <Link to="/contribute" className="btn btn-secondary hover:no-underline"><Icon name="upload" size={15} /> Contribute data</Link>
-              <Link to="/plot" className="btn btn-secondary hover:no-underline"><Icon name="chart" size={15} /> Plot the data</Link>
+              <Link to="/browse/cell-size?view=plot" className="btn btn-secondary hover:no-underline"><Icon name="chart" size={15} /> Plot the data</Link>
             </div>
           </div>
         </div>

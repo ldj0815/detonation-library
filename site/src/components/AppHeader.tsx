@@ -1,13 +1,20 @@
 import { useState, type FormEvent } from 'react'
-import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Icon from './Icon'
 import { getTheme, setTheme, resolvedTheme } from '../lib/theme'
 
+const isBrowse = (p: string) => p.startsWith('/cases') || p.startsWith('/browse') || p === '/search'
+const isPlot = (p: string, s: string) => isBrowse(p) && new URLSearchParams(s).get('view') === 'plot'
+
+// Plot is the plot view of the category being browsed: RDE from an RDE page,
+// cell size from everywhere else. The links are plain Links with aria-current
+// set from match(): NavLink would mark Plot current on the table views, whose
+// path it shares.
 const NAV = [
-  { label: 'Browse', to: '/cases', match: (p: string) => p.startsWith('/cases') || p.startsWith('/browse') || p === '/search' },
-  { label: 'Plot', to: '/plot', match: (p: string) => p === '/plot' },
-  { label: 'Contribute', to: '/contribute', match: (p: string) => p === '/contribute' },
-  { label: 'About', to: '/about', match: (p: string) => p === '/about' },
+  { label: 'Browse', to: () => '/cases', match: (p: string, s: string) => isBrowse(p) && !isPlot(p, s) },
+  { label: 'Plot', to: (p: string) => (p.startsWith('/browse/rde') ? '/browse/rde?view=plot' : '/browse/cell-size?view=plot'), match: isPlot },
+  { label: 'Contribute', to: () => '/contribute', match: (p: string) => p === '/contribute' },
+  { label: 'About', to: () => '/about', match: (p: string) => p === '/about' },
 ]
 
 function Brand() {
@@ -54,28 +61,22 @@ export default function AppHeader() {
     setQ('')
   }
 
-  const links = NAV.map(item => (
-    <NavLink
-      key={item.to}
-      to={item.to}
-      className={() => {
-        const active = item.match(location.pathname)
-        return `relative inline-flex items-center h-9 px-2.5 rounded-[6px] text-[13.5px] font-medium hover:no-underline transition-colors ${
+  const links = NAV.map(item => {
+    const active = item.match(location.pathname, location.search)
+    return (
+      <Link
+        key={item.label}
+        to={item.to(location.pathname)}
+        aria-current={active ? 'page' : undefined}
+        className={`relative inline-flex items-center h-9 px-2.5 rounded-[6px] text-[13.5px] font-medium hover:no-underline transition-colors ${
           active ? 'text-ink' : 'text-ink-2 hover:text-ink hover:bg-surface-2'
-        }`
-      }}
-    >
-      {({ isActive }) => {
-        const active = isActive || item.match(location.pathname)
-        return (
-          <>
-            {item.label}
-            {active && <span className="absolute left-2.5 right-2.5 -bottom-[9px] h-[3px] rounded-full bg-mark" aria-hidden="true" />}
-          </>
-        )
-      }}
-    </NavLink>
-  ))
+        }`}
+      >
+        {item.label}
+        {active && <span className="absolute left-2.5 right-2.5 -bottom-[9px] h-[3px] rounded-full bg-mark" aria-hidden="true" />}
+      </Link>
+    )
+  })
 
   return (
     <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-line">
@@ -137,18 +138,22 @@ export default function AppHeader() {
               </label>
             </form>
             <nav className="flex flex-col" aria-label="Primary">
-              {NAV.map(item => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={`flex items-center justify-between h-10 px-2 rounded-[6px] text-[14px] font-medium hover:no-underline ${
-                    item.match(location.pathname) ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-surface-2'
-                  }`}
-                >
-                  {item.label}
-                  <Icon name="chevronRight" size={14} className="text-ink-3" />
-                </NavLink>
-              ))}
+              {NAV.map(item => {
+                const active = item.match(location.pathname, location.search)
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.to(location.pathname)}
+                    aria-current={active ? 'page' : undefined}
+                    className={`flex items-center justify-between h-10 px-2 rounded-[6px] text-[14px] font-medium hover:no-underline ${
+                      active ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-surface-2'
+                    }`}
+                  >
+                    {item.label}
+                    <Icon name="chevronRight" size={14} className="text-ink-3" />
+                  </Link>
+                )
+              })}
             </nav>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { useCaseList, useAllCases, useCategoryCounts } from '../../data/hooks'
 import type { CaseListParams } from '../../data/query'
@@ -14,10 +14,12 @@ import Skeleton from '../../components/Skeleton'
 import ErrorMessage from '../../components/ErrorMessage'
 import EmptyState from '../../components/EmptyState'
 import Icon from '../../components/Icon'
-import { countActiveFilters, clearFilters, listValues, numberParam } from '../../components/filters'
+import CasePlot from './CasePlot'
+import CasePublications from './CasePublications'
+import { REFERENCE_PARAM, countActiveFilters, clearFilters, listValues, numberParam } from '../../components/filters'
 import { categoryFor, type BrowseMode } from '../../lib/categories'
 import { downloadCasesCsv } from '../../lib/csv'
-import { fmtCount } from '../../lib/format'
+import { caseReference, fmtCount } from '../../lib/format'
 import { HIDDEN_MEASUREMENTS } from '../../config'
 
 const PAGE_SIZES = [25, 50, 100]
@@ -36,6 +38,13 @@ const SORT_OPTIONS = [
   { value: 'critical_energy_j:asc', label: 'Critical energy, low to high' },
 ].filter(o => !HIDDEN_MEASUREMENTS.has(o.value.split(':')[0]))
 
+const VIEWS = [
+  { value: 'table', label: 'Table' },
+  { value: 'plot', label: 'Plot' },
+  { value: 'publications', label: 'Publications' },
+] as const
+type View = typeof VIEWS[number]['value']
+
 interface BrowsePageProps {
   mode: BrowseMode
   focusSearch?: boolean
@@ -47,9 +56,11 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
   const { visible, toggle, reset } = useVisibleColumns()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const counts = useCategoryCounts()
+  const view: View = VIEWS.find(v => v.value === params.get('view'))?.value ?? 'table'
+  const countRef = useRef<HTMLParagraphElement>(null)
 
   const limit = PAGE_SIZES.includes(Number(params.get('limit'))) ? Number(params.get('limit')) : PAGE_SIZES[0]
-  const offset = Number(params.get('offset') ?? 0)
+  const rawOffset = Number(params.get('offset') ?? 0)
   const sortBy = params.get('sort_by') ?? 'created_at'
   const sortDir = params.get('sort_dir') ?? 'desc'
 
@@ -60,6 +71,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
     geometry: listValues(params, 'geometry').join(',') || undefined,
     primary_diluent_name: listValues(params, 'primary_diluent_name').join(',') || undefined,
     primary_dopant_name: listValues(params, 'primary_dopant_name').join(',') || undefined,
+    reference: params.get(REFERENCE_PARAM)?.trim() || undefined,
     equivalence_ratio_min: numberParam(params, 'equivalence_ratio_min'),
     equivalence_ratio_max: numberParam(params, 'equivalence_ratio_max'),
     pressure_min: numberParam(params, 'pressure_min'),
@@ -72,15 +84,45 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
     sort_dir: sortDir,
   }
 
-  const { data, isLoading, isError, refetch } = useCaseList({ ...filterParams, limit, offset })
-  // The unpaged result set, for the CSV export. In-memory, so it costs little.
+  // The unpaged result set, for the CSV export, the plot and the publications.
+  // In-memory, so it costs little.
   const all = useAllCases(filterParams)
+  // A page past the end (an old link, or filters that shrank the list) shows
+  // the first page instead of an empty one.
+  const total = all.data?.total
+  const offset = Number.isInteger(rawOffset) && rawOffset > 0 && (total == null || rawOffset < total) ? rawOffset : 0
+  const { data, isLoading, isError, refetch } = useCaseList({ ...filterParams, limit, offset })
+  // The whole category, unfiltered: the publications view's totals and the
+  // plot's colours, which stay the same whatever the filters leave.
+  const categoryAll = useAllCases(category.filter)
+  const publicationCount = useMemo(
+    () => (all.data ? new Set(all.data.items.map(c => caseReference(c)).filter(Boolean)).size : undefined),
+    [all.data],
+  )
 
   const setParam = (key: string, value: string | null) => {
     const next = new URLSearchParams(params)
     if (value == null) next.delete(key)
     else next.set(key, value)
     setParams(next, { replace: true })
+  }
+
+  const setView = (v: View) => {
+    const next = new URLSearchParams(params)
+    if (v === 'table') next.delete('view')
+    else next.set('view', v)
+    setParams(next, { replace: true })
+  }
+
+  // From a publication card: that paper's cases, in the table.
+  const showPublication = (reference: string) => {
+    const next = new URLSearchParams(params)
+    next.set(REFERENCE_PARAM, reference)
+    next.delete('view')
+    next.delete('offset')
+    setParams(next, { replace: true })
+    countRef.current?.focus({ preventScroll: true })
+    window.scrollTo({ top: 0 })
   }
 
   const onSort = (value: string) => {
@@ -130,27 +172,51 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
         {/* Results */}
         <section className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
-            <p className="text-[14px] text-ink mr-auto" aria-live="polite">
+            <p ref={countRef} tabIndex={-1} className="text-[14px] text-ink mr-auto" aria-live="polite">
               {data ? (
-                <><span className="num font-medium">{fmtCount(data.total)}</span> {data.total === 1 ? 'case' : 'cases'}</>
+                <>
+                  <span className="num font-medium">{fmtCount(data.total)}</span> {data.total === 1 ? 'case' : 'cases'}
+                  {publicationCount != null && publicationCount > 0 && (
+                    <span className="text-ink-2"> from <span className="num">{fmtCount(publicationCount)}</span> {publicationCount === 1 ? 'publication' : 'publications'}</span>
+                  )}
+                </>
               ) : isLoading ? 'Loading…' : ''}
             </p>
-            <label className="flex items-center gap-1.5 text-[12.5px] text-ink-2">
-              Sort
-              <select value={sortValue} onChange={e => onSort(e.target.value)} className="select select-sm w-auto">
-                {!sortValue && <option value="">Custom</option>}
-                {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </label>
-            <label className="flex items-center gap-1.5 text-[12.5px] text-ink-2">
-              Rows
-              <select value={limit} onChange={e => { const next = new URLSearchParams(params); next.set('limit', e.target.value); next.delete('offset'); setParams(next, { replace: true }) }} className="select select-sm w-auto">
-                {PAGE_SIZES.map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </label>
-            <div className="hidden md:block">
-              <ColumnSelector visible={visible} onToggle={toggle} onReset={reset} forced={forced} />
+            <div role="group" aria-label="View" className="inline-flex rounded-[6px] border border-line-2 bg-surface p-0.5">
+              {VIEWS.map(v => (
+                <button
+                  key={v.value}
+                  type="button"
+                  aria-pressed={view === v.value}
+                  onClick={() => setView(v.value)}
+                  className={`h-[22px] px-2.5 rounded-[4px] text-[12.5px] font-medium transition-colors ${
+                    view === v.value ? 'bg-accent-soft text-accent-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+                  }`}
+                >
+                  {v.label}
+                </button>
+              ))}
             </div>
+            {view === 'table' && (
+              <>
+                <label className="flex items-center gap-1.5 text-[12.5px] text-ink-2">
+                  Sort
+                  <select value={sortValue} onChange={e => onSort(e.target.value)} className="select select-sm w-auto">
+                    {!sortValue && <option value="">Custom</option>}
+                    {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </label>
+                <label className="flex items-center gap-1.5 text-[12.5px] text-ink-2">
+                  Rows
+                  <select value={limit} onChange={e => { const next = new URLSearchParams(params); next.set('limit', e.target.value); next.delete('offset'); setParams(next, { replace: true }) }} className="select select-sm w-auto">
+                    {PAGE_SIZES.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </label>
+                <div className="hidden md:block">
+                  <ColumnSelector visible={visible} onToggle={toggle} onReset={reset} forced={forced} />
+                </div>
+              </>
+            )}
             <button type="button" onClick={exportCsv} disabled={!all.data || all.data.total === 0} className="btn btn-secondary btn-sm" title="Download every case matching the current filters">
               <Icon name="download" size={14} /> Download CSV
             </button>
@@ -160,7 +226,7 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
 
           {isLoading && <Skeleton table rows={10} />}
           {isError && <ErrorMessage message="The case list could not be loaded." onRetry={refetch} />}
-          {data && data.items.length === 0 && (
+          {data && data.total === 0 && (
             <EmptyState
               title={activeCount > 0 ? 'No cases match these filters' : `No ${category.label} cases yet`}
               action={activeCount > 0 ? (
@@ -178,13 +244,20 @@ export default function BrowsePage({ mode, focusSearch = false }: BrowsePageProp
                   : 'This category has no cases yet.'}
             </EmptyState>
           )}
-          {data && data.items.length > 0 && (
+          {data && data.total > 0 && view === 'table' && (
             <>
               <DataTable items={data.items} visibleColumns={visible} forcedColumns={forced} />
               <div className="mt-4">
                 <Pagination total={data.total} limit={limit} offset={offset} onChange={o => setParam('offset', String(o))} />
               </div>
             </>
+          )}
+          {data && data.total > 0 && view !== 'table' && (
+            all.data && categoryAll.data ? (
+              view === 'plot'
+                ? <CasePlot items={all.data.items} allItems={categoryAll.data.items} />
+                : <CasePublications items={all.data.items} allItems={categoryAll.data.items} onShow={showPublication} />
+            ) : <Skeleton rows={8} />
           )}
         </section>
       </div>

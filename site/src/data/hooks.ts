@@ -5,7 +5,7 @@ import { useRde } from './rde'
 import { filterCases, filterOptions, queryCases, sortCases } from './query'
 import type { CaseListParams } from './query'
 import { CATEGORIES, type BrowseMode } from '../lib/categories'
-import { parseTitle } from '../lib/format'
+import { caseReference } from '../lib/format'
 import type { CaseDetail, FilterOptions } from '../types/case'
 import type { PaginatedResponse } from '../types/common'
 
@@ -102,8 +102,8 @@ export function useLibraryStats(): { data: LibraryStats | undefined } {
     if (!cases.data) return undefined
     const refs = new Set<string>()
     for (const c of cases.data) {
-      const ref = parseTitle(c.title).reference ?? c.doi_reference
-      if (ref) refs.add(ref.trim().toLowerCase())
+      const ref = caseReference(c)
+      if (ref) refs.add(ref.toLowerCase())
     }
     return {
       cases: cases.data.length,

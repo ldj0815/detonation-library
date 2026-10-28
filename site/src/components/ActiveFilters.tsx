@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 import Icon from './Icon'
-import { LIST_PARAMS, LIST_LABELS, RANGE_PARAMS, listValues, countActiveFilters, clearFilters } from './filters'
+import { LIST_PARAMS, LIST_LABELS, RANGE_PARAMS, REFERENCE_PARAM, listValues, countActiveFilters, clearFilters } from './filters'
+import { parseReference } from '../lib/format'
 
 interface Chip {
   label: string
@@ -14,6 +15,13 @@ export default function ActiveFilters() {
   const chips: Chip[] = []
   const q = params.get('q')?.trim()
   if (q) chips.push({ label: `“${q}”`, remove: p => p.delete('q') })
+
+  const ref = params.get(REFERENCE_PARAM)?.trim()
+  if (ref) {
+    const parsed = parseReference(ref)
+    const label = parsed?.index != null ? `${parsed.label}, ref. ${parsed.index}` : ref
+    chips.push({ label: `Publication: ${label}`, remove: p => p.delete(REFERENCE_PARAM) })
+  }
 
   for (const key of LIST_PARAMS) {
     for (const value of listValues(params, key)) {
