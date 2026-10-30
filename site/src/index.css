@@ -264,7 +264,8 @@
     position: relative;
     isolation: isolate;
   }
-  .banner-copy::before {
+  /* Footage behind the whole text needs a panel; beside it, the text sits on the band. */
+  .banner-video-only .banner-copy::before {
     content: '';
     position: absolute;
     inset: -24px -20px;
@@ -297,9 +298,10 @@
     .banner-clip { opacity: 0.25; }
     .banner-inner {
       width: 100%;
+      background: linear-gradient(90deg, var(--surface) 30%, transparent 100%);
     }
-    .banner-copy::before { inset: -20px -12px; }
-    .banner-video-only .banner-inner { width: 100%; }
+    .banner-video-only .banner-copy::before { inset: -20px -12px; }
+    .banner-video-only .banner-inner { width: 100%; background: none; }
     .banner-foot { left: 16px; }
     .banner-cap { font-size: 10px; }
   }

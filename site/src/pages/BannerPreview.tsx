@@ -30,7 +30,7 @@ export default function BannerPreview() {
     return () => window.removeEventListener('message', receive)
   }, [])
   return <>
-    <div style={{ padding: '14px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--line)', fontWeight: 600 }}>◈ &nbsp; Detonation Library</div>
+    <div style={{ padding: '14px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--line)', fontWeight: 600 }}>◈ &nbsp; Detonation Science and Technology Library</div>
     <HeroBanner settings={settings} controls={controls} forceMotion onTimeline={timeline => {
       window.parent.postMessage({ type: 'banner-timeline', ...timeline, commandId: commandId.current, height: Math.ceil(document.querySelector('.banner')?.getBoundingClientRect().bottom ?? 520) }, location.origin)
     }}><div style={{ visibility: showText ? 'visible' : 'hidden' }}><HomeHeroContent preview /></div></HeroBanner>

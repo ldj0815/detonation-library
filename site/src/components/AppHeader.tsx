@@ -19,13 +19,16 @@ const NAV = [
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2.5 text-ink hover:no-underline hover:text-ink shrink-0" aria-label="Detonation Library home">
-      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+    <Link to="/" className="flex items-center gap-2.5 text-ink hover:no-underline hover:text-ink shrink-0" aria-label="Detonation Science and Technology Library home">
+      <svg width="26" height="26" viewBox="0 0 26 26" className="shrink-0" aria-hidden="true">
         <rect width="26" height="26" rx="6" fill="var(--accent-ink)" />
         <path d="M4 13 L13 5 L22 13 L13 21 Z" fill="none" stroke="var(--mark)" strokeWidth="1.6" />
         <path d="M8.5 13 L13 9 L17.5 13 L13 17 Z" fill="var(--mark)" fillOpacity="0.9" />
       </svg>
-      <span className="font-semibold text-[15px] tracking-tight">Detonation Library</span>
+      {/* Two lines below lg, where one would crowd out the search and the nav. */}
+      <span className="font-semibold text-[14px] lg:text-[15px] leading-[1.2] tracking-tight">
+        Detonation Science and{' '}<br className="lg:hidden" />Technology Library
+      </span>
     </Link>
   )
 }
