@@ -1,0 +1,35 @@
+{
+  "source": "animation/26_07_19-test51-13kPa-2_H2-1_O2-17_Ar-3kPaC2H4start-0.2usec-0.5MFPS-10ns-256Fr-0p-2c_contrast_50.00-sig.avi",
+  "source_frame_start_inclusive": 2,
+  "source_frame_end_exclusive": 191,
+  "crop": {
+    "x": 20,
+    "y": 0,
+    "width": 360,
+    "height": 250
+  },
+  "asset": "test51",
+  "oct22_crop": {
+    "x": 48,
+    "y": 16,
+    "width": 292,
+    "height": 200
+  },
+  "oct22_crop_and_frames": "Recovered by normalized cross-correlation of the 22 October clip-grey.mp4 against the AVI; frames 16 onward match one-to-one.",
+  "render": {
+    "width": 1080,
+    "height": 750,
+    "scale": 3,
+    "antialiasing": "Bicubic enlargement of the detail magnitude before the contrast curve; no frame interpolation or sharpening.",
+    "window": "Footage fades to the background over 3 to 9 px inside the round schlieren window's edge.",
+    "geometry": "The banner's front trajectory is in 360 x 250 crop pixels (site/src/components/banner/test51/drawing.ts)."
+  },
+  "denoise": "nlmeans=s=5:p=5:r=11,hqdn3d=1.5:1.5:2.5:2.5",
+  "tone_mapping": "As on 22 October: |frame - gaussian(frame, 5)|, minus 2.5, over 48, to the power 0.9, into the site's light and dark palettes.",
+  "frames": 189,
+  "playback_fps": 15,
+  "duration_seconds": 12.6,
+  "capture_fps_from_filename": 500000,
+  "poster_source_frame": 62,
+  "note": "Decorative banner footage; not measurement data. The original AVI is unchanged."
+}

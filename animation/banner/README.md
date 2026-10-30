@@ -160,3 +160,23 @@ The header leaves the text background clear, provides a pause control, pauses
 in hidden tabs, and shows a still image for reduced motion until
 Play is requested. The category tabs, release metadata and data controls remain
 part of the RDE page.
+
+## Home banner: test51 at 3×
+
+The home page plays the test51 recording again, with the drawn transverse waves
+of the 22 October banner (`site/src/components/banner/test51/`). `render_test51.py`
+renders `test51-light` and `test51-dark` MP4s and posters at 1080 × 750 straight
+from the original AVI, over a 360 × 250 region from (20, 0): the full frame height,
+wider than the 22 October 292 × 200 window from (48, 16). It keeps that clip's
+frames (AVI 2 to 190, 15 fps), denoising and tone curve, but enlarges the detail
+3× before the curve instead of letting the browser stretch a small picture. The
+background estimate uses only pixels inside the round schlieren window, and the
+footage fades out over its last few pixels, so the window's edge does not show.
+The drawing's front trajectory moved with the crop (x0 = 356.5784 crop pixels).
+
+```sh
+python animation/banner/render_test51.py --ffmpeg /path/to/ffmpeg
+```
+
+`test51-processing.json` records the crop, frames and processing. The settings-
+driven test04 banner and its editor are unchanged; the editor previews test04.

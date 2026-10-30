@@ -122,7 +122,7 @@ export default function BannerEditor() {
       const value = await response.json()
       if (!response.ok) throw new Error(value.error || 'Could not save to the project.')
       setSaved(parseBannerSettings(value.settings))
-      status('Saved to project. The local homepage now uses these settings. The live site has not changed.')
+      status('Saved to project. The test04 banner now uses these settings; the homepage plays the test51 banner. The live site has not changed.')
     } catch (e) { status(e instanceof Error ? e.message : 'Could not save to the project.', true) }
     finally { setSaving(false) }
   }
@@ -197,7 +197,7 @@ export default function BannerEditor() {
           </div>
           <div className="be-source-notes"><h3>Your editing workspace</h3><p>The yellow frame shows the selected part of the 628 × 480 recording. The banner takes a centered view into it; zoom and the video share control how much is visible.</p>
             {!videoOnly && <p>Cell dimensions use the recording’s pixels. Larger cells are allowed to extend outside the banner.</p>}
-            <p><strong>Save to project</strong> updates the local homepage. Publishing the live website is a separate step.</p>
+            <p><strong>Save to project</strong> updates the test04 banner's settings file. The homepage currently plays the test51 banner instead; publishing the live website is a separate step.</p>
             <div className="be-file-actions"><button className="btn btn-secondary" onClick={download}>Download settings</button><button className="btn btn-secondary" onClick={() => importInput.current?.click()}>Import settings</button>
               <input ref={importInput} type="file" accept=".json,application/json" hidden onChange={e => void importSettings(e)} /></div>
           </div>

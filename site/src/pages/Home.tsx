@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useCategoryCounts, useFilterOptions, useLibraryStats } from '../data/hooks'
-import HeroBanner from '../components/banner/HeroBanner'
 import HomeHeroContent from '../components/banner/HomeHeroContent'
+import Test51Banner from '../components/banner/test51/Test51Banner'
 import Icon from '../components/Icon'
 import { CATEGORIES } from '../lib/categories'
 import { fmtCount, GALCIT_DB_URL, GALCIT_REPORT_DOI } from '../lib/format'
@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <HeroBanner><HomeHeroContent /></HeroBanner>
+      <Test51Banner><HomeHeroContent /></Test51Banner>
 
       {/* Numbers */}
       <section className="border-b border-line bg-surface">
